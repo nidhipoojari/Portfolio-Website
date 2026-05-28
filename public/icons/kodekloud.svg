@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 140" role="img" aria-label="KodeKloud">
+  <defs>
+    <linearGradient id="kkCloud" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"  stop-color="#3FD1E7"/>
+      <stop offset="100%" stop-color="#2A5BD7"/>
+    </linearGradient>
+  </defs>
+  <!-- Cloud silhouette -->
+  <path fill="url(#kkCloud)"
+        d="M52 118c-23 0-42-17-42-38 0-19 15-34 34-36 5-23 26-40 51-40 29 0 52 23 52 52 0 2 0 4-1 6 19 2 34 17 34 36 0 21-19 38-42 38H52z"/>
+  <!-- Code brackets </> -->
+  <g fill="none" stroke="#0c1733" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="82,56 64,76 82,96"/>
+    <polyline points="118,56 136,76 118,96"/>
+    <line x1="108" y1="50" x2="92" y2="102"/>
+  </g>
+</svg>

@@ -1,0 +1,7 @@
+home page
+1. one image
+2. need about me section
+3. make email clickable
+4. add GitHub and linkedin like email
+5. reduce text font of page labels
+

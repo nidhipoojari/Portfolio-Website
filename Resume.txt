@@ -1,0 +1,92 @@
+SUMMARY
+Nidhi Poojari
+Baltimore, Maryland | 667-386-3363 | nidhipoojari702@gmail.com | Linkedin | Github | Website
+Full-stack software developer with 4+ years of experience in production systems and startups. Proficient in React, Node.js/Express,
+PHP/Laravel, and database optimization. Currently pursuing Master’s in Information Sciences at UMBC while teaching web development
+fundamentals to undergraduate students. Proven expertise in building scalable web applications, RESTful APIs, and responsive UI/UX.
+Strong foundation in DevOps, cloud infrastructure, and agile development practices.
+RELEVANT EXPERIENCE
+Graduate Assistant– Web Development Lab, UMBC
+Jan 2026– Present
+• Grading assessments and providing technical mentorship for 60+ undergraduate students on full-stack web development fundamentals.
+• Conducting live proctoring, debugging student code across HTML/CSS/JavaScript/React, and resolving technical issues.
+• Explaining core concepts (DOM manipulation, state management, REST APIs, responsive design) to facilitate deeper understanding.
+• Skills: HTML5, CSS3, JavaScript (ES6+), React, Debugging, AJAX, PHP, Linux
+Full Stack Developer, NIAN
+Oct 2024– Dec 2025
+• Optimized RESTful PHP (Laravel) APIs and MySQL queries, achieving 10% improvement in response times (verified via Postman)
+• Developed React single-page applications with advanced state management (Redux/Context API) and performance optimization
+techniques including lazy loading, and pagination, resulting in 20% improvement in app load performance.
+• Implemented responsive UI components using CSS with cross-browser compatibility, integrated third-party APIs for seamless data flow.
+• Tech Stack: React, PHP, Laravel, MySQL, REST APIs, Postman, Git, Docker
+Full Stack Developer, AppOctet Technologies
+Feb 2021- Jul 2021
+• Architected web apps for tourism and logistics domains, including a delivery management system that reduced dispatch overhead by 25%.
+• Optimized MySQL database queries and React frontend components, maintaining 99% uptime across production environments.
+• Designed responsive, mobile-first interfaces using HTML5, CSS3, Bootstrap, and modern JavaScript, managed frontend state with React
+hooks and component lifecycle.
+• Tech Stack: React, PHP, Laravel, MySQL, Bootstrap, RESTful APIs, JavaScript, Git
+System Engineer, Bombay Stock Exchange
+Nov 2021– Sep 2024
+• Managed critical real-time trading infrastructure, leading operational decisions for 99.99% uptime during live market hours.
+• Developed Python and Shell scripts to automate infrastructure monitoring, reducing manual tasks and incident detection time by 10%.
+• Implemented dashboards using Java and MySQL to visualize real-time system health, transaction throughput, and latency metrics.
+• Built data processing pipelines for FIX protocol message handling (decoding, parsing, routing), handling millions of transactions daily.
+• Diagnosed and resolved performance bottlenecks through log analysis and SQL query optimization.
+• Tech Stack: Python, Shell Scripting, MySQL, Linux, REST APIs, JSON, Git, Jenkins, Trading, FIX Protocol, Broadcast, Log Analysis, System
+Monitoring
+TECHNICAL SKILLS
+• Frontend:React, Vue.js, Next.js, HTML5, CSS3 (Grid/Flexbox), JavaScript (ES6+), TypeScript, Bootstrap, Material-UI, Responsive
+Design, Component Architecture, State Management (Redux/Context API), DOM Manipulation
+• Backend:Node.js, Express.js, PHP, Laravel, RESTful APIs, GraphQL, Database Design, SQL Optimization, Microservices
+• Databases:MySQL, PostgreSQL, MongoDB, Redis (Caching & Cache Invalidation), Query Optimization
+• Tools &Platforms:Git, SVN, Jenkins, Linux (Advanced), Postman, Chrome DevTools, VS Code, Webpack
+• DevOps&Infrastructure:AWS (EC2, S3, RDS), CI/CD, Infrastructure as Code, Docker, Kubernetes, Monitoring & Logging
+• Other:Agile Development, Technical Communication, Debugging & Troubleshooting, Performance Optimization, Testing & QA
+PROJECTS
+• Portfolio Website
+Technologies: [React, JavaScript (ES6+), HTML5, CSS3, Responsive Design, Git]
+◦ Modern, responsive single-page application showcasing projects and professional work
+◦ Built with React, CSS animations, and responsive design; optimized for performance and SEO.
+EDUCATION
+July 2025
+[ ]
+• Master of Science, Information Sciences,
+University of Maryland, Baltimore County
+Jan 2026- Dec 2027
+Maryland, USA
+◦ Coursework: Advanced Databases, Web Development, Data Mining, Cloud Computing
+
+VOLUNTEERING
+• Managed the official NSS SIES Instagram page, coordinated content strategy, and handled communications to engage and grow our
+student community.
+• Experience handling front-desk coverage during university events and departmental activities, ensuring professional interactions and
+efficient visitor support.
+• Coordinated logistics and communications for multiple campus events (street plays, blood donation camps, marathon camps), including
+setup and wrap-up.
+• Proficient in coordinating schedules, handling email communications, and supporting faculty with logistical needs.
+• Collected donations in public spaces to support an autistic student’s group.
+• Documented activities, tracked participant info, and maintained records, directly aligning with event preparation, program support, and
+internal database maintenance.
+
+EDUCATION
+July 2025
+[ ]
+• University Of Baltimore County,
+Masters In Information Sciences
+• SIESGraduate School Of Technology,
+Bachelors Of Engineering in Electronics and Telecommunication
+◦ Relevant Courses : Object Oriented Programming, Database Management, Linux System Administration, Java
+SKILLS
+Jan 2026- Dec 2027
+Maryland, USA
+Aug 2016- Nov 2020
+Navi Mumbai, India
+• Media:Adobe Photoshoot, Adobe Acrobat, Adobe Lightroom
+• Microsoft Office Suite:Excel, Word, PowerPoint
+• Operating Systems Environments:Linux (Advanced), JBoss (Application Server)
+• Administrative:Office Administration, Social Media Management, Departmental IT Support, Communication, Event Coordination
+• Version Control CI/CD Tools:Git, SVN, Jenkins
+• Database Systems:MySQL
+• Tools:Google Suite, Postman, Git, SVN, Jenkins
+• WebTechnologies:HTML, CSS, JavaScript, Bootstrap, PHP, Reac

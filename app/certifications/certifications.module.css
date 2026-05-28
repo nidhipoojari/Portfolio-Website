@@ -1,0 +1,56 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  background: transparent;
+  border: none;
+}
+
+@media (max-width: 900px) {
+  .grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+  .grid { grid-template-columns: 1fr; }
+}
+
+.card {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  padding: 2.5rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-height: 280px;
+  transition: background 0.25s, color 0.25s;
+}
+.card:hover { background: var(--fg); color: var(--bg); opacity: 1; }
+
+.icon {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  margin-bottom: 1.25rem;
+  display: block;
+  /* Logos keep their full colour on hover-invert; remove next two
+     lines if you want the logo to follow the card colours instead. */
+  transition: transform 0.25s ease;
+}
+.card:hover .icon { transform: scale(1.05); }
+
+.name {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  line-height: 1.2;
+}
+
+.issuer { color: var(--fg-muted); margin: 0; font-style: italic; }
+.year   { font-size: 0.78rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--fg-muted); margin: 0; }
+
+.cta {
+  margin-top: auto;
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  border-top: 1px solid currentColor;
+  padding-top: 1rem;
+}
