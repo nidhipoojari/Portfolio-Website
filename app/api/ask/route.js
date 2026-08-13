@@ -1,16 +1,22 @@
 // The endpoint behind the ask box. Question in, plain text out,
 // streamed, grounded in lib/data.js.
 //
+// Provider is OpenRouter through its OpenAI-compatible API, which
+// means the official openai client works unchanged — only the base URL
+// differs. Point OPENAI_BASE_URL at api.openai.com and this talks to
+// OpenAI direct instead, with nothing else to rewrite.
+//
 // This file is the only place the API key is touched, and it runs on
 // the server — the key never gets near the browser bundle.
 
-import Anthropic from '@anthropic-ai/sdk';
+import OpenAI from 'openai';
 import { SYSTEM_PROMPT } from '@/lib/corpus';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const MODEL = 'claude-opus-5';
+const BASE_URL = process.env.OPENAI_BASE_URL || 'https://openrouter.ai/api/v1';
+const MODEL = process.env.AI_MODEL || 'openai/gpt-4o-mini';
 const MAX_QUESTION_CHARS = 400;
 
 // Fixed window per IP, held in memory. Being honest about what this
@@ -54,7 +60,7 @@ const text = (body, status) =>
   });
 
 export async function POST(request) {
-  if (!process.env.ANTHROPIC_API_KEY) {
+  if (!process.env.OPENAI_API_KEY) {
     return text(
       'The assistant is not configured yet. Reach Nidhi directly at nidhipoojari702@gmail.com.',
       503
@@ -82,33 +88,50 @@ export async function POST(request) {
     return text(`Keep it under ${MAX_QUESTION_CHARS} characters.`, 400);
   }
 
-  const client = new Anthropic();
-
-  const stream = client.beta.messages.stream({
-    model: MODEL,
-    max_tokens: 1024, // the prompt asks for 2-4 sentences; this is headroom
-    betas: ['server-side-fallback-2026-07-01'],
-    fallbacks: 'default',
-    // Low effort on purpose. Answering "has she used Kubernetes" from
-    // a profile that is already in the prompt is a lookup, not a
-    // reasoning problem. Turning thinking off entirely is worse — it
-    // can leak internal tags into what the visitor sees.
-    thinking: { type: 'adaptive' },
-    output_config: { effort: 'low' },
-    system: [
-      {
-        type: 'text',
-        text: SYSTEM_PROMPT,
-        // The corpus is identical byte for byte on every request, so
-        // caching it means only the first visitor pays full price for
-        // those tokens. Everyone after that reads it at ~10%.
-        cache_control: { type: 'ephemeral' },
-      },
-    ],
-    // Everything volatile has to sit after the cache breakpoint, or
-    // there is nothing stable left to cache.
-    messages: [{ role: 'user', content: question.trim() }],
+  const client = new OpenAI({
+    baseURL: BASE_URL,
+    apiKey: process.env.OPENAI_API_KEY,
+    // OpenRouter attributes traffic with these. Harmless when the base
+    // URL points somewhere else — OpenAI just ignores them.
+    defaultHeaders: {
+      'HTTP-Referer': 'https://nidhipoojari.vercel.app',
+      'X-Title': 'Nidhi Poojari — Portfolio',
+    },
   });
+
+  // This await has to be guarded. Unlike a lazily-iterated stream, the
+  // openai client fires the request here and throws on the spot for a
+  // bad key, a rate limit upstream, or an unreachable provider — all
+  // before the ReadableStream below exists to catch anything. Letting
+  // that escape hands the visitor a blank 500, which is the one thing
+  // this endpoint is not allowed to do.
+  let stream;
+  try {
+    stream = await client.chat.completions.create({
+      model: MODEL,
+      max_tokens: 1024, // the prompt asks for 2-4 sentences; this is headroom
+      // Low temperature on purpose. Answering "has she used Kubernetes"
+      // from a profile already sitting in the prompt is a lookup, not a
+      // creative task, and invention is the one failure mode that would
+      // actually matter here.
+      temperature: 0.3,
+      stream: true,
+      messages: [
+        // The corpus goes first and never varies, so it stays a stable
+        // prefix across every request. That ordering is what lets the
+        // provider's automatic prompt caching hit at all — put the
+        // question above it and there is nothing stable left to cache.
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: question.trim() },
+      ],
+    });
+  } catch (error) {
+    console.error('[ask] could not open stream:', error);
+    return text(
+      'Something went wrong reaching the assistant. Email Nidhi at nidhipoojari702@gmail.com.',
+      502
+    );
+  }
 
   const encoder = new TextEncoder();
 
@@ -116,25 +139,30 @@ export async function POST(request) {
     async start(controller) {
       const send = (chunk) => controller.enqueue(encoder.encode(chunk));
       let wroteSomething = false;
+      let stopReason = null;
 
       try {
-        for await (const event of stream) {
-          if (
-            event.type === 'content_block_delta' &&
-            event.delta.type === 'text_delta'
-          ) {
+        for await (const chunk of stream) {
+          const choice = chunk.choices?.[0];
+          if (!choice) continue;
+
+          if (choice.finish_reason) stopReason = choice.finish_reason;
+
+          const delta = choice.delta?.content;
+          if (delta) {
             wroteSomething = true;
-            send(event.delta.text);
+            send(delta);
           }
         }
 
         // A declined request is not an exception — it comes back as a
-        // perfectly successful response whose stop_reason is
-        // "refusal". Without this check the visitor just gets silence.
-        const final = await stream.finalMessage();
-        if (final.stop_reason === 'refusal' && !wroteSomething) {
+        // perfectly successful stream that simply carries no content,
+        // flagged on the way out. Without this the visitor gets silence.
+        if (!wroteSomething) {
           send(
-            "I can't answer that one. Ask me about Nidhi's work, projects, or background instead."
+            stopReason === 'content_filter'
+              ? "I can't answer that one. Ask me about Nidhi's work, projects, or background instead."
+              : 'The assistant had nothing to say to that. Try rephrasing, or email Nidhi at nidhipoojari702@gmail.com.'
           );
         }
       } catch (error) {

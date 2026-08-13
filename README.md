@@ -10,8 +10,8 @@
 [![Next.js](https://img.shields.io/badge/Next.js%2014-App%20Router-black?logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-18.3-61DAFB?logo=react&logoColor=black)](https://react.dev/)
 [![Styling](https://img.shields.io/badge/Styling-CSS%20Modules%20%C2%B7%20zero%20deps-1572B6?logo=css3&logoColor=white)](https://nextjs.org/docs/app/building-your-application/styling/css-modules)
-[![AI](https://img.shields.io/badge/AI-Claude%20%C2%B7%20streaming%20%C2%B7%20prompt%20caching-blueviolet?logo=anthropic&logoColor=white)](#-the-ask-terminal)
-[![Deploy](https://img.shields.io/badge/Deploy-Vercel%20%C2%B7%20push--to--main-000000?logo=vercel&logoColor=white)](#️-deployment)
+[![AI](https://img.shields.io/badge/AI-OpenRouter%20%C2%B7%20gpt--4o--mini%20%C2%B7%20streaming-blueviolet?logo=openai&logoColor=white)](#-api-reference)
+[![Deploy](https://img.shields.io/badge/Deploy-Vercel%20%C2%B7%20push--to--main-000000?logo=vercel&logoColor=white)](#-deployment)
 
 </div>
 
@@ -38,7 +38,7 @@ The result is a site that loads fast, degrades cleanly with JavaScript off, resp
 
 | Feature | Description |
 |---|---|
-| 💬 **Ask terminal** | A monospace command line where a visitor can ask *"does she have production experience at scale?"* and get a streamed, grounded answer. Built on the **Claude API** with the whole site as context. |
+| 💬 **Ask terminal** | A monospace command line where a visitor can ask *"does she have production experience at scale?"* and get a streamed, grounded answer — **gpt-4o-mini via OpenRouter**, with the whole site as its context. |
 | 🖼️ **Hand-built carousel** | Arrows, dots, keyboard nav, pointer-event swipe, two aspect-ratio variants. No Swiper, no Embla, ~180 lines. |
 | 🎞️ **Motion primitives** | `SplitReveal` (word-by-word mask reveal), `Reveal` (IntersectionObserver fade-up), `PageTransition` (route-change fade). CSS animations, no Framer Motion. |
 | 🌗 **Flash-free theming** | Light/dark stored in `localStorage` and applied by a blocking inline script *before* first paint, so there's no white flash on a dark-mode reload. |
@@ -74,11 +74,12 @@ The result is a site that loads fast, degrades cleanly with JavaScript off, resp
 <tr><td valign="top">
 
 **AI / LLM Engineering**
-- **Anthropic SDK** streaming responses token-by-token into the UI
-- **Prompt caching** on a byte-stable system prompt (~10% input cost after the first call)
+- **OpenRouter** through its OpenAI-compatible API — one base-URL change swaps the whole provider
+- Streaming chat completions piped token-by-token into the UI
 - Corpus building — `lib/data.js` flattened into a plain-text profile at import time
-- Adaptive thinking at low effort — a grounded lookup, not a reasoning task
-- `refusal` stop-reason handling and graceful degradation with **no API key at all**
+- Stable-prefix prompt ordering so automatic prompt caching can hit
+- `content_filter` and empty-completion handling; graceful degradation with **no API key at all**
+- `/api/health` key-presence probe that never echoes the key
 
 </td><td valign="top">
 
@@ -131,10 +132,11 @@ graph TD
         M["SplitReveal · Reveal · PageTransition · Marquee · Cursor"]
         T["AskTerminal"]
     end
-    subgraph API ["Route Handler — server only"]
+    subgraph API ["Route Handlers — server only"]
         RT["POST /api/ask<br/>rate limit → validate → stream"]
+        H["GET /api/health<br/>keyConfigured probe"]
     end
-    CL["Claude API<br/>streaming · prompt-cached system prompt"]
+    CL["OpenRouter<br/>OpenAI-compatible · gpt-4o-mini"]
 
     D --> R
     I --> D
@@ -144,9 +146,9 @@ graph TD
     R --> M
     R --> T
     T -->|"fetch, streamed text"| RT
-    C -->|"cached system prompt"| RT
-    RT -->|"SDK stream"| CL
-    CL -->|"text deltas"| RT
+    C -->|"system prompt"| RT
+    RT -->|"openai client"| CL
+    CL -->|"content deltas"| RT
     RT -->|"ReadableStream"| T
 ```
 
@@ -158,9 +160,10 @@ visitor types a question
    → POST /api/ask
    → IP rate-limit gate  (12 requests / 10 min, per instance)
    → validate + 400-char cap
-   → system prompt = full site corpus  [cache_control: ephemeral]
-   → Claude, adaptive thinking @ low effort
-   → text deltas → TextEncoder → ReadableStream
+   → system prompt = full site corpus   [stable prefix, cacheable]
+   → user message = the question        [the only volatile part]
+   → OpenRouter → gpt-4o-mini, temperature 0.3, stream: true
+   → content deltas → TextEncoder → ReadableStream
    → reader.read() loop → setAnswer(prev + chunk)
    → answer types itself out on screen, character by character
 ```
@@ -193,7 +196,8 @@ Light mode redefines the same tokens in the same warm-neutral hue family, invert
 │   ├── layout.js              Root layout — Nav, theme boot script, motion chrome
 │   ├── page.js                Home — hero, skills marquee, about, ask terminal
 │   ├── globals.css            Design tokens, reset, shared page classes
-│   ├── api/ask/route.js       Streaming Claude endpoint (server only)
+│   ├── api/ask/route.js       Streaming LLM endpoint (server only)
+│   ├── api/health/route.js    Is the API key wired up in this deploy?
 │   ├── experience/            ┐
 │   ├── education/             │
 │   ├── extracurricular/       ├─ one folder = one URL, each rendering <Section/>
@@ -224,7 +228,7 @@ Light mode redefines the same tokens in the same warm-neutral hue family, invert
 
 ## 🚀 Quick Start
 
-**Prerequisites:** Node 18.17+ (Node 20 recommended). *The Anthropic key is optional — everything except the ask terminal runs without it.*
+**Prerequisites:** Node 18.17+ (Node 20 recommended). *The API key is optional — everything except the ask terminal runs without it.*
 
 ```bash
 git clone https://github.com/nidhipoojari/Portfolio-Website.git
@@ -242,10 +246,23 @@ cp .env.local.example .env.local   # then paste your key
 ```
 
 ```dotenv
-ANTHROPIC_API_KEY=sk-ant-...
+OPENAI_API_KEY=sk-or-v1-...
+
+# Both optional — these are the defaults.
+OPENAI_BASE_URL=https://openrouter.ai/api/v1
+AI_MODEL=openai/gpt-4o-mini
 ```
 
-Get a key at [console.anthropic.com](https://console.anthropic.com/settings/keys). Without it the box politely tells visitors to email me instead — nothing else on the site depends on it.
+Get a key at [openrouter.ai/keys](https://openrouter.ai/keys). Without it the box politely tells visitors to email me instead — nothing else on the site depends on it.
+
+**Swapping providers** is a base-URL change, because OpenRouter speaks the OpenAI wire format and the route uses the official `openai` client. To go direct to OpenAI, set `OPENAI_BASE_URL=https://api.openai.com/v1` and `AI_MODEL=gpt-4o-mini` (no `openai/` prefix). No code edit.
+
+Confirm a running instance actually picked the key up:
+
+```bash
+curl -s http://localhost:3000/api/health
+# {"ok":true,"keyConfigured":true,"model":"openai/gpt-4o-mini", …}
+```
 
 ### Scripts
 
@@ -271,7 +288,7 @@ Get a key at [console.anthropic.com](https://console.anthropic.com/settings/keys
 
 ## 🌐 API Reference
 
-One endpoint. It takes a question and streams back plain text.
+Two endpoints — one does the work, one tells you whether it can.
 
 ### `POST /api/ask`
 
@@ -293,13 +310,14 @@ intelligence with SHAP-explained predictions and a five-tool agent…
 | `200` | Streaming answer | Plain-text deltas |
 | `400` | Missing, empty, unparseable, or >400-char question | Short explanation |
 | `429` | Over 12 requests in 10 minutes from one IP | "Give it a few minutes, or just email…" |
-| `503` | `ANTHROPIC_API_KEY` not configured | Falls back to my email address |
+| `503` | `OPENAI_API_KEY` not configured | Falls back to my email address |
 
 **Implementation notes**
 
 - `runtime = 'nodejs'`, `dynamic = 'force-dynamic'` — never statically cached
-- The system prompt carries `cache_control: { type: 'ephemeral' }`; because the corpus is byte-stable across requests, every question after the first reads it from cache
+- The corpus is byte-stable and goes in the system message, so it stays a constant prefix across requests and automatic prompt caching has something to match on; the question is the only part that varies
 - Rate limiting is in-memory per instance and resets on cold start — a courtesy throttle against casual abuse, *not* a security boundary. Vercel KV is the swap-in if this ever sees real traffic
+- A refusal arrives as a successful stream carrying no content, so an empty completion is handled explicitly rather than left as silence
 - The key is read server-side only and never reaches the browser bundle
 
 **Try it from the terminal:**
@@ -309,6 +327,21 @@ curl -N -X POST http://localhost:3000/api/ask \
   -H 'Content-Type: application/json' \
   -d '{"question":"Has she worked with Kubernetes?"}'
 ```
+
+### `GET /api/health`
+
+Answers one question: did this deployment actually get an API key? The failure it catches is a silent one — miss the env var in Vercel and the site builds clean, looks perfect, and quietly tells every visitor to send an email instead.
+
+```json
+{
+  "ok": true,
+  "keyConfigured": true,
+  "model": "openai/gpt-4o-mini",
+  "baseUrl": "https://openrouter.ai/api/v1"
+}
+```
+
+Reports only *whether* a key is present, never the key or any prefix of it.
 
 ---
 
@@ -323,8 +356,11 @@ git push origin main   →   Vercel build   →   live in ~40s
 **To deploy your own copy:**
 
 1. Import the repo at [vercel.com/new](https://vercel.com/new) — the Next.js preset is detected automatically
-2. Add `ANTHROPIC_API_KEY` under **Project → Settings → Environment Variables** (skip this and the site still deploys fine, just without the ask terminal)
+2. Add `OPENAI_API_KEY` under **Project → Settings → Environment Variables** (skip this and the site still deploys fine, just without the ask terminal). `OPENAI_BASE_URL` and `AI_MODEL` are optional overrides
 3. Push to `main`
+4. Hit `/api/health` on the deployed URL to confirm the key came through
+
+Environment variables are read at request time, not baked into the build — but Vercel only re-reads them on a new deployment, so adding the key to an existing project needs a redeploy before `/api/health` will admit to seeing it.
 
 Every non-`main` branch gets its own preview URL, which is how the copy on this site gets proofread before it goes public.
 
