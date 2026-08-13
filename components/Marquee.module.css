@@ -1,0 +1,68 @@
+.wrap {
+  overflow: hidden;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 1.4rem 0;
+  /* Fade the strip out at both edges so items don't hard-clip. */
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 8%,
+    #000 92%,
+    transparent
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 8%,
+    #000 92%,
+    transparent
+  );
+}
+
+.track {
+  display: flex;
+  width: max-content;
+  animation-name: scroll;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.wrap:hover .track {
+  animation-play-state: paused;
+}
+
+.list {
+  display: flex;
+  align-items: center;
+  gap: 3rem;
+  margin: 0;
+  padding: 0 1.5rem 0 0;
+  list-style: none;
+}
+
+.item {
+  flex: none;
+  font-size: 0.72rem;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  white-space: nowrap;
+  transition: color 0.3s ease;
+}
+
+.item:hover { color: var(--fg); }
+
+@keyframes scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .track { animation: none; }
+  .wrap {
+    overflow-x: auto;
+    mask-image: none;
+    -webkit-mask-image: none;
+  }
+}

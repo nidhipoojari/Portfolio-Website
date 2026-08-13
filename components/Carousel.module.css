@@ -1,0 +1,139 @@
+.wrap { width: 100%; }
+
+.frame {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  /* Let the browser own vertical scrolling; we only claim horizontal
+     gestures for the swipe handler. */
+  touch-action: pan-y;
+  cursor: grab;
+  transition: transform 0.2s var(--ease-smooth);
+}
+
+/* A light "gripped" cue the instant a swipe starts — confirms the
+   gesture registered before the threshold commits to the next image. */
+.dragging {
+  cursor: grabbing;
+  transform: scale(0.985);
+}
+
+/* Dragging shouldn't select the image or show a text caret. */
+.frame img {
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* Focus ring for keyboard users — arrow keys act on the focused
+   carousel, so the focused one has to be visible. */
+.frame:focus-visible {
+  outline: 1px solid var(--fg);
+  outline-offset: 3px;
+}
+
+.img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  animation: fade 500ms var(--ease-smooth) both;
+}
+
+/* ---------- "wide" variant — product screenshots ----------
+   Screenshots are ~2:1 landscape. Cropping them to the 4:5 portrait
+   frame would leave a useless sliver, so the frame goes landscape and
+   the image is contained (letterboxed against --bg-soft) instead.
+   Kept desaturated to hold the monochrome palette; full colour on
+   hover so the actual UI is readable. */
+.frameWide {
+  aspect-ratio: 16 / 10;
+}
+
+.imgWide {
+  object-fit: contain;
+  filter: grayscale(100%) contrast(1.05);
+  transition: filter 400ms ease;
+}
+
+.frameWide:hover .imgWide {
+  filter: grayscale(0%) contrast(1);
+}
+
+@media (hover: none) {
+  /* No hover on touch devices — show the screenshots in colour. */
+  .imgWide { filter: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .img { animation: none; }
+  .imgWide { transition: none; }
+}
+
+@keyframes fade {
+  from { opacity: 0; transform: scale(1.015); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--line);
+  /* Always a dark scrim + light icon: this sits on top of a photo, not
+     the page background, so it stays fixed rather than following the
+     light/dark theme (which would otherwise wash the icon out). */
+  background: rgba(10, 10, 10, 0.55);
+  color: #f4f1ec;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  transition: background 0.2s var(--ease-smooth), color 0.2s var(--ease-smooth),
+              transform 0.3s var(--ease-smooth);
+}
+.btn:hover  { background: var(--fg); color: var(--bg); transform: translateY(-50%) scale(1.08); }
+.btn:active { transform: translateY(-50%) scale(0.92); transition-duration: 0.12s; }
+.left  { left: 0.75rem; }
+.right { right: 0.75rem; }
+
+.dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--line);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+.activeDot { background: var(--fg); transform: scale(1.4); }
+
+.counter {
+  margin-top: 0.5rem;
+  text-align: center;
+  font-size: 0.75rem;
+  letter-spacing: 0.3em;
+  color: var(--fg-muted);
+}
+
+.empty {
+  aspect-ratio: 4 / 5;
+  display: grid;
+  place-items: center;
+  border: 1px dashed var(--line);
+  color: var(--fg-muted);
+  font-style: italic;
+}
+
+.emptyWide { aspect-ratio: 16 / 10; }

@@ -1,0 +1,94 @@
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem var(--gutter);
+  background: var(--nav-bg);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+  transition: background-color 300ms ease, border-color 300ms ease;
+}
+
+.brand {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  letter-spacing: 0.3em;
+}
+
+.list {
+  list-style: none;
+  display: flex;
+  gap: 2rem;
+  margin: 0;
+  padding: 0;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--fg-muted);
+}
+
+.list a.active,
+.list a:hover { color: var(--fg); opacity: 1; }
+
+/* ---------- Mobile toggle ---------- */
+.toggle {
+  display: none;
+  padding: 0.35rem 0;
+  border: none;
+  background: none;
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  cursor: pointer;
+  transition: transform 0.2s var(--ease-smooth);
+}
+.toggle:active { transform: scale(0.88); }
+
+/* ---------- Full-screen panel ---------- */
+/* Rendered only while `visible` (see Nav.js) so it can fade/scale out
+   before actually leaving the DOM, rather than snapping away instantly. */
+.panel {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: var(--bg);
+  padding: 7rem var(--gutter) 3rem;
+  overflow-y: auto;
+  opacity: 0;
+  transform: scale(0.97) translateY(-8px);
+  transition: opacity 0.3s var(--ease-smooth), transform 0.3s var(--ease-smooth),
+              background-color 400ms var(--ease-smooth);
+}
+
+.panelOpen {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+.panelList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.panelList a {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 9vw, 3rem);
+  line-height: 1;
+  color: var(--fg-muted);
+}
+
+.panelList a.panelActive { color: var(--fg-display); }
+
+@media (max-width: 720px) {
+  .list   { display: none; }
+  .toggle { display: block; }
+}

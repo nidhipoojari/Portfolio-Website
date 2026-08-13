@@ -1,0 +1,43 @@
+/* Mirrors home.module.css's .cta so the toggle sits flush with the
+   Email / GitHub / LinkedIn row it lives next to. */
+.toggle {
+  display: inline-block;
+  padding: 0.25rem 0;
+  border: none;
+  background: none;
+  color: var(--fg-muted);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  cursor: pointer;
+  position: relative;
+  transition: opacity 0.3s var(--ease-smooth), transform 0.3s var(--ease-smooth),
+              color 0.3s var(--ease-smooth);
+}
+
+.toggle::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 1px;
+  width: 100%;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s var(--ease-smooth);
+}
+
+.toggle:hover {
+  opacity: 1;
+  color: var(--fg);
+  transform: translateY(-2px);
+}
+.toggle:hover::after { transform: scaleX(1); }
+
+/* Tactile press feedback on the click that actually flips the theme. */
+.toggle:active {
+  transform: translateY(-2px) scale(0.92);
+  transition-duration: 0.12s;
+}

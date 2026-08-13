@@ -1,0 +1,170 @@
+/* ============================================================
+   AskTerminal — monospace command line, monochrome
+   System mono stack, so no extra font is downloaded.
+   ============================================================ */
+
+.wrap {
+  border-top: 1px solid var(--line);
+  padding: clamp(3rem, 7vw, 5.5rem) var(--gutter);
+}
+
+.inner {
+  max-width: var(--max-w);
+  margin: 0 auto;
+}
+
+.label {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  color: var(--fg-display);
+  margin: 0 0 1.75rem;
+}
+
+/* ---------- Input row ---------- */
+.form {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border: 1px solid var(--line);
+  background: var(--bg-soft);
+  padding: 0.9rem 1.1rem;
+  transition: border-color 0.25s ease;
+}
+
+.form:focus-within {
+  border-color: var(--fg-muted);
+}
+
+.caret {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color: var(--fg-muted);
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: none;
+  outline: none;
+  color: var(--fg);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.input::placeholder {
+  color: var(--fg-faint);
+}
+
+.input:disabled {
+  opacity: 0.5;
+}
+
+.submit {
+  flex: none;
+  border: none;
+  background: none;
+  color: var(--fg-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 0.2rem 0;
+  transition: color 0.25s ease;
+}
+
+.submit:hover:not(:disabled) {
+  color: var(--fg);
+}
+
+.submit:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* ---------- Suggested questions ---------- */
+.suggestions {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin: 1rem 0 0;
+  padding: 0;
+}
+
+.chip {
+  border: 1px solid var(--line);
+  background: none;
+  color: var(--fg-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  padding: 0.45rem 0.8rem;
+  cursor: pointer;
+  transition: color 0.25s ease, border-color 0.25s ease;
+}
+
+.chip:hover:not(:disabled) {
+  color: var(--fg);
+  border-color: var(--fg-muted);
+}
+
+.chip:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* ---------- Exchange ---------- */
+.exchange {
+  margin-top: 1.75rem;
+  border-left: 1px solid var(--line);
+  padding-left: 1.25rem;
+}
+
+.question,
+.answer {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.86rem;
+  line-height: 1.75;
+  margin: 0;
+}
+
+.question {
+  color: var(--fg-muted);
+  margin-bottom: 0.75rem;
+}
+
+.answer {
+  color: var(--fg);
+  max-width: 68ch;
+  white-space: pre-wrap;
+}
+
+/* Blinking block cursor while the answer streams in. */
+.cursor {
+  display: inline-block;
+  width: 0.55em;
+  height: 1em;
+  margin-left: 0.15em;
+  vertical-align: text-bottom;
+  background: var(--fg);
+  animation: blink 1s steps(2, start) infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+.note {
+  margin: 1.75rem 0 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  color: var(--fg-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor { animation: none; }
+}

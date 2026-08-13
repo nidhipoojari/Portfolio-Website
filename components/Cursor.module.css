@@ -1,0 +1,14 @@
+.dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #ffffff;
+  mix-blend-mode: difference;
+  pointer-events: none;
+  z-index: 200;
+  /* Positioned via transform in JS — no transition here, the rAF lerp
+     already does the smoothing. */
+}

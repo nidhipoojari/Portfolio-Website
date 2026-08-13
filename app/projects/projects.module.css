@@ -1,0 +1,33 @@
+/* ============================================================
+   projects.module.css — styles scoped to the Projects page
+   ============================================================ */
+
+.stack {
+  margin-top: 1.25rem;
+  font-size: 0.72rem;
+  line-height: 1.9;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+
+.links {
+  margin-top: 1.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.link {
+  padding-bottom: 0.2rem;
+  border-bottom: 1px solid var(--line);
+  transition: border-color 0.25s ease, opacity 0.25s ease;
+}
+
+.link:hover {
+  border-bottom-color: var(--fg);
+  opacity: 1;
+}
