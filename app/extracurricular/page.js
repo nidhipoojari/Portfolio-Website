@@ -1,6 +1,3 @@
-/**
- * app/extracurricular/page.js
- */
 import Section from '@/components/Section';
 import { extracurricular } from '@/lib/data';
 import PageTitle from '@/components/PageTitle';

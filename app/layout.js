@@ -1,19 +1,15 @@
-/**
- * app/layout.js
- * ------------------------------------------------------------------
- * Root layout — wraps every page.
- * Loads the Forum font from Google Fonts and renders the shared Nav,
- * the motion chrome (grain, vignette, cursor) and the route-change
- * transition.
- * ------------------------------------------------------------------
- */
+// Wraps every page: the font, the nav, the grain and vignette layers,
+// and the route-change transition.
+
 import { Forum } from 'next/font/google';
 import Nav from '@/components/Nav';
 import Cursor from '@/components/Cursor';
 import PageTransition from '@/components/PageTransition';
 import './globals.css';
 
-// next/font auto-self-hosts the font for performance + privacy.
+// next/font downloads Forum at build time and serves it from our own
+// origin — no request to Google on page load, and no layout shift
+// waiting for it.
 const forum = Forum({
   subsets: ['latin'],
   weight: '400',
@@ -29,16 +25,17 @@ export const metadata = {
 };
 
 /**
- * Runs in <head>, before first paint:
- *  - marks the document as JavaScript-capable, which is what gates the
- *    scroll-reveal hidden state in globals.css. Without this, a visitor
- *    with JS disabled would get a page of invisible content instead of
- *    a plain static one.
- *  - applies the visitor's saved (or system) light/dark preference via
- *    a `data-theme` attribute on <html>, so there's no flash of the
- *    wrong theme on load. This attribute lives on the root layout,
- *    which never unmounts between routes, so the choice — made once
- *    from the ThemeToggle button on the home page — applies site-wide.
+ * Two things that have to happen before the first paint, which is why
+ * this is a blocking inline script and not an effect.
+ *
+ * First, it marks the document as JavaScript-capable. Everything the
+ * scroll reveals hide is hidden behind `html.js` in globals.css, so
+ * without this flag a visitor with JS turned off would be staring at a
+ * page of invisible text.
+ *
+ * Second, it reads the saved (or system) colour preference and sets
+ * data-theme immediately. Do this in React instead and dark-mode
+ * visitors get a white flash on every cold load.
  */
 const JS_FLAG = `
 document.documentElement.classList.add('js');

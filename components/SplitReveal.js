@@ -1,23 +1,23 @@
 'use client';
 /**
- * components/SplitReveal.js
- * ------------------------------------------------------------------
- * Word-by-word mask reveal for display type. Each word sits inside an
- * overflow-hidden box and slides up from below with a stagger.
+ * Word-by-word mask reveal for headings. Each word sits in an
+ * overflow-hidden box and slides up from underneath, one after the
+ * next.
  *
- * Splitting is done here rather than with GSAP SplitText — the text is
- * a single line of a heading, so `String.split(' ')` is the whole job.
+ * GSAP SplitText does this and a great deal more. Here the input is a
+ * single line of heading text, so `split(' ')` is the entire algorithm
+ * and the animation is six lines of CSS.
  *
- * The plain text is always present for screen readers and for the
- * no-JS case; only the visual layer is split into spans.
+ * Note the two layers below: the real string stays in the DOM for
+ * screen readers and for the no-JS case, and the per-word spans are
+ * aria-hidden decoration on top of it.
  *
- * Props:
- *   text    : string to animate
- *   as      : element type (default 'h1')
- *   stagger : ms between words (default 55)
- *   stack   : one word per line instead of flowing inline
- *   inline  : render as an inline box, so siblings sit on the same line
- * ------------------------------------------------------------------
+ * @param text    The string to animate.
+ * @param as      Element to render as. Defaults to h1.
+ * @param stagger Milliseconds between words.
+ * @param stack   One word per line instead of flowing inline.
+ * @param inline  Render inline so siblings share the line — used by
+ *                PageTitle to keep its accent period attached.
  */
 import styles from './SplitReveal.module.css';
 

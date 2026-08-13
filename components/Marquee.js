@@ -1,13 +1,9 @@
-/**
- * components/Marquee.js
- * ------------------------------------------------------------------
- * Infinite horizontal strip of skills, bounded by hairlines.
- *
- * Pure CSS: the list is rendered twice and the track is translated by
- * -50%, so the second copy lands exactly where the first began and the
- * loop is seamless. No JS, no library, no layout thrash.
- * ------------------------------------------------------------------
- */
+// The scrolling skills strip on the home page.
+//
+// The trick is that the list is rendered twice and the track slides by
+// exactly -50%: copy B lands where copy A started, so the loop has no
+// seam. All CSS — there is no JavaScript in this file at all.
+
 import styles from './Marquee.module.css';
 
 export default function Marquee({ items = [], speed = 60 }) {

@@ -1,18 +1,15 @@
 'use client';
-/**
- * components/ThemeToggle.js
- * ------------------------------------------------------------------
- * Flips the `data-theme` attribute on <html> between 'light' and
- * 'dark' and remembers the choice in localStorage. The attribute
- * lives on the root layout, which never unmounts between routes, so
- * one click here changes every page on the site, not just Home.
- *
- * Rendered `null`-until-mounted so the server-rendered markup and the
- * first client render match exactly (localStorage isn't available on
- * the server) — avoids a hydration warning at the cost of a one-frame
- * placeholder label.
- * ------------------------------------------------------------------
- */
+// Flips data-theme on <html> and remembers the choice. Because that
+// attribute lives on the root layout, which never unmounts between
+// routes, one click here re-themes the entire site and not just the
+// page the button happens to sit on.
+//
+// The theme starts as null and is only read after mount: localStorage
+// does not exist on the server, so reading it during render would make
+// the server HTML and the first client render disagree. The cost is one
+// frame of a placeholder label, which is cheaper than a hydration
+// mismatch.
+
 import { useEffect, useState } from 'react';
 import styles from './ThemeToggle.module.css';
 

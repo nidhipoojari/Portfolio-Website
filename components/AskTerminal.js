@@ -1,14 +1,11 @@
 'use client';
-/**
- * components/AskTerminal.js
- * ------------------------------------------------------------------
- * A monospace command line where visitors can ask about Nidhi's work.
- * Answers stream in from /api/ask, grounded in lib/data.js.
- *
- * Deliberately one exchange at a time — no chat history, no avatars.
- * The point is to answer a recruiter's question, not to be a chatbot.
- * ------------------------------------------------------------------
- */
+// A command line where visitors can ask about my work. Answers stream
+// in from /api/ask and are grounded in whatever lib/data.js says.
+//
+// One exchange at a time on purpose — no history, no avatars, no
+// typing bubbles. It should answer a recruiter's question and get out
+// of the way, not pretend to be a chatbot.
+
 import { useState, useRef, useEffect } from 'react';
 import styles from './AskTerminal.module.css';
 
@@ -27,7 +24,9 @@ export default function AskTerminal() {
   const inputRef = useRef(null);
   const abortRef = useRef(null);
 
-  // Cancel any in-flight request if the component goes away.
+  // Navigate away mid-answer and the request should die with the
+  // component, not keep streaming into a setState that no longer has
+  // anywhere to go.
   useEffect(() => () => abortRef.current?.abort(), []);
 
   async function ask(raw) {
@@ -59,7 +58,9 @@ export default function AskTerminal() {
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
 
-      // Stream tokens straight into the answer as they arrive.
+      // Append each chunk as it lands. No buffering, no typewriter
+      // timer faking it — the text appears at whatever speed the model
+      // actually produces it.
       for (;;) {
         const { value, done } = await reader.read();
         if (done) break;

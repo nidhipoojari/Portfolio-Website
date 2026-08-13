@@ -1,13 +1,8 @@
-/**
- * components/PageTitle.js
- * ------------------------------------------------------------------
- * The large editorial heading at the top of each list page, with the
- * trailing accent period. Words mask-reveal on load.
- *
- * The period is decorative — it's hidden from assistive tech so the
- * heading reads as "Experience", not "Experience.".
- * ------------------------------------------------------------------
- */
+// The big heading at the top of each list page. Words mask-reveal on
+// load; the trailing period is purely decorative, which is why it is
+// hidden from screen readers — the heading should read "Experience",
+// not "Experience dot".
+
 import SplitReveal from './SplitReveal';
 
 export default function PageTitle({ text }) {

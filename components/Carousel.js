@@ -1,25 +1,15 @@
 'use client';
 /**
- * components/Carousel.js
- * ------------------------------------------------------------------
- * Lightweight image carousel — no external libraries.
+ * The image carousel. Arrows, dots, keyboard, swipe — written out
+ * rather than pulled in, because Swiper and Embla both weigh more than
+ * this whole component and I only needed two behaviours from either.
  *
- * Props:
- *   images  : string[]   Array of image URLs (e.g. /images/foo.jpeg)
- *   alt     : string     Alt-text prefix used for accessibility
- *   variant : 'portrait' | 'wide'
- *             'portrait' (default) — 4:5 frame, cover. For photos.
- *             'wide'               — 16:10 frame, contain. For product
- *                                    screenshots, which must not be cropped.
- *
- * Features:
- *   - Prev / Next arrow buttons
- *   - Dot indicators
- *   - Keyboard arrow keys (scoped to the hovered/focused carousel)
- *   - Swipe / drag via pointer events
- *   - Auto-clamps index when the array length changes
- *   - Controls hide themselves when there is only one image
- * ------------------------------------------------------------------
+ * @param images  Image URLs, e.g. ['/images/home/1.jpeg'].
+ * @param alt     Alt-text prefix; each slide gets "<alt> <n>".
+ * @param variant 'portrait' is a 4:5 cover frame and suits photos.
+ *                'wide' is 16:10 and contains rather than crops —
+ *                product screenshots lose their point when the edges
+ *                get cut off.
  */
 import { useState, useEffect, useCallback, useRef } from 'react';
 import styles from './Carousel.module.css';
@@ -27,7 +17,9 @@ import styles from './Carousel.module.css';
 export default function Carousel({ images = [], alt = 'photo', variant = 'portrait' }) {
   const [i, setI] = useState(0);
 
-  // Guard against empty arrays
+  // The index counter runs unbounded in both directions and gets
+  // wrapped here, so prev() at slide 0 lands on the last image instead
+  // of stalling at -1.
   const total = images.length;
   const safeIndex = total ? ((i % total) + total) % total : 0;
 
@@ -36,12 +28,10 @@ export default function Carousel({ images = [], alt = 'photo', variant = 'portra
   const prev = useCallback(() => setI((n) => n - 1), []);
   const next = useCallback(() => setI((n) => n + 1), []);
 
-  // Keyboard navigation.
-  //
-  // Scoped deliberately: a page can hold several carousels (Experience
-  // has five), and a bare window listener per instance made one arrow
-  // press advance every carousel at once. Only the carousel the user is
-  // actually pointing at or focused inside responds.
+  // Arrow keys. The scoping here is not premature — the first version
+  // put a bare window listener on every instance, so one keypress on
+  // the Experience page advanced all five carousels in unison. Now
+  // only the one being hovered or focused answers.
   useEffect(() => {
     if (total < 2) return;
 
@@ -55,7 +45,7 @@ export default function Carousel({ images = [], alt = 'photo', variant = 'portra
         el.matches(':hover') || el.contains(document.activeElement);
       if (!engaged) return;
 
-      e.preventDefault();  // don't also scroll the page
+      e.preventDefault();  // otherwise the page scrolls too
       if (e.key === 'ArrowLeft') prev();
       else next();
     };
@@ -64,19 +54,17 @@ export default function Carousel({ images = [], alt = 'photo', variant = 'portra
     return () => window.removeEventListener('keydown', onKey);
   }, [prev, next, total]);
 
-  // ---------- Swipe / drag ----------
-  // Pointer events cover touch, pen and mouse in one path, so there is
-  // no separate touchstart/mousedown handling. A horizontal move past
-  // the threshold commits; anything shorter, or anything more vertical
-  // than horizontal, is treated as a scroll and ignored.
+  // Swipe. Pointer events handle touch, pen and mouse through one code
+  // path, so there is no parallel touchstart/mousedown branch to keep
+  // in sync. Past the threshold horizontally and it commits; anything
+  // shorter, or anything more vertical than horizontal, was a scroll.
   const dragRef = useRef(null);
   const SWIPE_THRESHOLD = 45; // px
   const [dragging, setDragging] = useState(false);
 
   const onPointerDown = (e) => {
     if (total < 2) return;
-    // Ignore secondary buttons; let the arrow buttons handle their own clicks.
-    if (e.button && e.button !== 0) return;
+    if (e.button && e.button !== 0) return;  // right/middle click isn't a swipe
     dragRef.current = { x: e.clientX, y: e.clientY, settled: false };
     setDragging(true);
   };
@@ -88,7 +76,7 @@ export default function Carousel({ images = [], alt = 'photo', variant = 'portra
     const dx = e.clientX - drag.x;
     const dy = e.clientY - drag.y;
 
-    // Vertical intent — the visitor is scrolling the page, not swiping.
+    // More vertical than horizontal — they're scrolling, not swiping.
     if (Math.abs(dy) > Math.abs(dx)) {
       dragRef.current = null;
       setDragging(false);

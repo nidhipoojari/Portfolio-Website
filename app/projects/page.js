@@ -1,11 +1,10 @@
-/**
- * app/projects/page.js
- * ------------------------------------------------------------------
- * Projects index. Content lives in lib/data.js — edit there, not here.
- * Each project may declare `links.live`, `links.github`, `links.paper`,
- * any combination, or none; only the ones present are rendered.
- * ------------------------------------------------------------------
- */
+// Projects index — content in lib/data.js, as always.
+//
+// A project can carry links.live, links.github, links.paper, some
+// combination, or nothing at all. Only what exists gets rendered,
+// which is why the published-paper project shows a single link and
+// NestIQ shows two.
+
 import Section from '@/components/Section';
 import PageTitle from '@/components/PageTitle';
 import { projects } from '@/lib/data';

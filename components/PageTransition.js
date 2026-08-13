@@ -1,15 +1,12 @@
 'use client';
-/**
- * components/PageTransition.js
- * ------------------------------------------------------------------
- * Fades and lifts the page content on every route change.
- *
- * Keyed on pathname so React remounts the subtree and the CSS
- * animation replays. The native View Transitions API would be the
- * nicer mechanism, but App Router support for it landed after
- * Next 14.2 — this achieves the same read with no experimental flags.
- * ------------------------------------------------------------------
- */
+// Fades and lifts the content on every route change.
+//
+// Keying the wrapper on pathname is the whole mechanism: React tears
+// down the subtree and rebuilds it, so the CSS animation replays.
+// View Transitions would be the tidier answer, but App Router support
+// for it landed after Next 14.2 and I did not want an experimental
+// flag in a portfolio.
+
 import { usePathname } from 'next/navigation';
 import styles from './PageTransition.module.css';
 

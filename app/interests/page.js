@@ -1,7 +1,5 @@
-/**
- * app/interests/page.js
- * Lists each interest from lib/data.js as a <Section/>.
- */
+// The non-engineer half. Same Section block as everywhere else.
+
 import Section from '@/components/Section';
 import { interests } from '@/lib/data';
 import PageTitle from '@/components/PageTitle';

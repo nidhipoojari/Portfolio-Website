@@ -1,13 +1,8 @@
-/**
- * components/Section.js
- * ------------------------------------------------------------------
- * Reusable two-column section block:
- *   left = title + meta + description (+ optional children)
- *   right = carousel of images
- *
- * Used by Experience, Education, Extracurricular, Projects pages.
- * ------------------------------------------------------------------
- */
+// The two-column block that most of the site is made of: copy on the
+// left, carousel on the right. Experience, Education, Extracurricular,
+// Projects and Interests all render through it, which is why those
+// page files are barely twenty lines each.
+
 import Carousel from './Carousel';
 import Reveal from './Reveal';
 import styles from './Section.module.css';
@@ -23,8 +18,8 @@ export default function Section({
   mediaVariant = 'portrait',
   children,
 }) {
-  // With no images, drop the media column entirely and let the copy run
-  // full width — better than showing an empty placeholder frame.
+  // No photos means no media column at all — the copy runs full width
+  // instead. An empty frame sitting there looks broken.
   const hasMedia = images.length > 0;
 
   return (

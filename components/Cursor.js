@@ -1,17 +1,12 @@
 'use client';
-/**
- * components/Cursor.js
- * ------------------------------------------------------------------
- * A small circle that trails the pointer, drawn with
- * mix-blend-mode: difference so it inverts whatever it passes over —
- * white on black, black on white. Costs nothing on a monochrome site
- * and is the one flourish that reads as "designed".
- *
- * Only mounts for devices with a fine pointer (mouse/trackpad) and
- * only when the visitor hasn't asked for reduced motion. Position is
- * driven through a rAF lerp so it lags the cursor slightly.
- * ------------------------------------------------------------------
- */
+// A dot that trails the pointer, painted with mix-blend-mode:
+// difference so it inverts whatever it crosses. On a site that is only
+// ever black or white, that costs nothing and is the one flourish I
+// kept.
+//
+// Mice and trackpads only, and never for anyone who asked for reduced
+// motion.
+
 import { useEffect, useRef, useState } from 'react';
 import styles from './Cursor.module.css';
 
@@ -38,8 +33,9 @@ export default function Cursor() {
     };
 
     const tick = () => {
-      // Lerp toward the pointer — 0.18 gives a soft trail without
-      // feeling laggy.
+      // Ease toward the pointer instead of snapping to it. 0.18 was
+      // picked by eye: high enough that the dot never feels broken,
+      // low enough that it visibly trails.
       current.x += (target.x - current.x) * 0.18;
       current.y += (target.y - current.y) * 0.18;
 

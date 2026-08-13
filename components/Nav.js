@@ -1,15 +1,11 @@
 'use client';
-/**
- * components/Nav.js
- * ------------------------------------------------------------------
- * Top navigation. Minimal text links — no logo, no buttons.
- * `usePathname` highlights the active link.
- *
- * Below 720px the inline list is replaced by a MENU / CLOSE toggle
- * that opens a full-screen panel. Seven links wrapping into three
- * rows of 0.7rem caps was the previous behaviour.
- * ------------------------------------------------------------------
- */
+// Top nav — text links only, no logo, no buttons.
+//
+// Under 720px the inline list becomes a Menu/Close toggle over a
+// full-screen panel. Seven links at 0.7rem used to wrap into three
+// stacked rows on a phone, which looked less like a navigation and
+// more like a mistake.
+
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -25,9 +21,9 @@ const links = [
   { href: '/interests',       label: 'Interests' },
 ];
 
-// Keep in sync with the .panel transition duration in Nav.module.css —
-// this is how long the panel stays mounted after closing so its
-// fade/scale-out actually gets to play instead of snapping away.
+// Must match the .panel transition duration in Nav.module.css. It is
+// how long the panel lingers after close so the fade-out can finish
+// instead of the whole thing vanishing mid-animation.
 const PANEL_EXIT_MS = 300;
 
 export default function Nav() {
@@ -35,11 +31,12 @@ export default function Nav() {
   const [open, setOpen] = useState(false);
   const [visible, setVisible] = useState(false);
 
-  // Close the panel whenever the route changes.
+  // Tapping a link should close the menu — the route change is the
+  // signal, so nothing needs to be wired to the links themselves.
   useEffect(() => setOpen(false), [pathname]);
 
-  // Mount immediately on open; stay mounted a beat after close so the
-  // exit transition can play, then unmount for real.
+  // Mount straight away on open, hang around for one transition on
+  // close, then actually unmount.
   useEffect(() => {
     if (open) {
       setVisible(true);
@@ -50,7 +47,10 @@ export default function Nav() {
     return () => clearTimeout(timer);
   }, [open, visible]);
 
-  // Escape closes; lock body scroll while the panel is open.
+  // Escape closes it, and the body stops scrolling underneath while
+  // it's open. Restoring the previous overflow value rather than
+  // blanking it keeps this from fighting anything else that might set
+  // it later.
   useEffect(() => {
     if (!open) return;
 

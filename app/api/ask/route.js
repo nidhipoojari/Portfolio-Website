@@ -1,14 +1,9 @@
-/**
- * app/api/ask/route.js
- * ------------------------------------------------------------------
- * The "ask about my work" endpoint.
- *
- * Takes a visitor question, answers it grounded in lib/data.js, and
- * streams the answer back as plain text.
- *
- * The API key is read server-side only and never reaches the browser.
- * ------------------------------------------------------------------
- */
+// The endpoint behind the ask box. Question in, plain text out,
+// streamed, grounded in lib/data.js.
+//
+// This file is the only place the API key is touched, and it runs on
+// the server — the key never gets near the browser bundle.
+
 import Anthropic from '@anthropic-ai/sdk';
 import { SYSTEM_PROMPT } from '@/lib/corpus';
 
@@ -18,11 +13,10 @@ export const dynamic = 'force-dynamic';
 const MODEL = 'claude-opus-5';
 const MAX_QUESTION_CHARS = 400;
 
-// ---------- Rate limiting ----------
-// In-memory fixed window, keyed by IP. This is per server instance and
-// resets on cold start, so it is a courtesy throttle against casual
-// abuse — not a security boundary. Swap in Vercel KV if this page ever
-// gets real traffic.
+// Fixed window per IP, held in memory. Being honest about what this
+// is: it lives in one instance and resets on cold start, so it slows
+// down someone idly hammering the box and nothing more. If this page
+// ever sees real traffic the state belongs in Vercel KV.
 const WINDOW_MS = 10 * 60 * 1000;
 const MAX_REQUESTS = 12;
 const hits = new Map();
@@ -34,7 +28,8 @@ function rateLimited(ip) {
   if (!entry || now > entry.resetAt) {
     hits.set(ip, { count: 1, resetAt: now + WINDOW_MS });
 
-    // Opportunistic cleanup so the map can't grow without bound.
+    // Sweep expired entries occasionally, otherwise the map grows for
+    // as long as the instance lives.
     if (hits.size > 5000) {
       for (const [key, value] of hits) {
         if (now > value.resetAt) hits.delete(key);
@@ -91,24 +86,27 @@ export async function POST(request) {
 
   const stream = client.beta.messages.stream({
     model: MODEL,
-    max_tokens: 1024, // answers are 2-4 sentences by instruction
+    max_tokens: 1024, // the prompt asks for 2-4 sentences; this is headroom
     betas: ['server-side-fallback-2026-07-01'],
     fallbacks: 'default',
-    // Adaptive thinking at low effort: this is a grounded lookup, not a
-    // reasoning problem. Preferred over disabling thinking outright,
-    // which can leak internal tags into the visible answer.
+    // Low effort on purpose. Answering "has she used Kubernetes" from
+    // a profile that is already in the prompt is a lookup, not a
+    // reasoning problem. Turning thinking off entirely is worse — it
+    // can leak internal tags into what the visitor sees.
     thinking: { type: 'adaptive' },
     output_config: { effort: 'low' },
     system: [
       {
         type: 'text',
         text: SYSTEM_PROMPT,
-        // The profile is byte-stable across requests, so every question
-        // after the first reads it from cache at ~10% of input price.
+        // The corpus is identical byte for byte on every request, so
+        // caching it means only the first visitor pays full price for
+        // those tokens. Everyone after that reads it at ~10%.
         cache_control: { type: 'ephemeral' },
       },
     ],
-    // The volatile part goes after the cache breakpoint.
+    // Everything volatile has to sit after the cache breakpoint, or
+    // there is nothing stable left to cache.
     messages: [{ role: 'user', content: question.trim() }],
   });
 
@@ -130,8 +128,9 @@ export async function POST(request) {
           }
         }
 
-        // Safety classifiers can decline a request; that arrives as a
-        // successful response with stop_reason "refusal", not an error.
+        // A declined request is not an exception — it comes back as a
+        // perfectly successful response whose stop_reason is
+        // "refusal". Without this check the visitor just gets silence.
         const final = await stream.finalMessage();
         if (final.stop_reason === 'refusal' && !wroteSomething) {
           send(

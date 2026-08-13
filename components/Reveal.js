@@ -1,17 +1,16 @@
 'use client';
 /**
- * components/Reveal.js
- * ------------------------------------------------------------------
- * Fade + 20px rise as the element scrolls into view. Fires once.
+ * Fade and rise as the element scrolls into view. Fires once and then
+ * stops observing.
  *
- * The hidden state lives in globals.css under `html.js .reveal`, so a
- * visitor without JavaScript sees the content normally instead of a
- * blank page. This component only flips the data-shown attribute.
+ * Worth knowing: the hidden state is defined in globals.css under
+ * `html.js .reveal`, not here. That class is only added by the boot
+ * script in the root layout, so with JavaScript off nothing is ever
+ * hidden in the first place — you get a plain page instead of a blank
+ * one. All this component does is flip data-shown.
  *
- * Props:
- *   as    : element type to render (default 'div')
- *   delay : ms to stagger this element behind its siblings
- * ------------------------------------------------------------------
+ * @param as    Element to render as. Defaults to a div.
+ * @param delay Milliseconds to trail behind sibling reveals.
  */
 import { useEffect, useRef } from 'react';
 
@@ -28,14 +27,16 @@ export default function Reveal({
     const el = ref.current;
     if (!el) return;
 
-    // No IntersectionObserver (very old browser) — just show it.
+    // Ancient browser with no IntersectionObserver: skip the animation
+    // and show the content.
     if (typeof IntersectionObserver === 'undefined') {
       el.dataset.shown = 'true';
       return;
     }
 
-    // Already in view on load (above the fold): show immediately so the
-    // first screen isn't blank while waiting for a scroll event.
+    // Observing also fires for elements already on screen at load, so
+    // above-the-fold content reveals immediately rather than waiting
+    // for a scroll that may never come.
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {

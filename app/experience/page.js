@@ -1,7 +1,5 @@
-/**
- * app/experience/page.js
- * Lists each role from lib/data.js as a <Section/>.
- */
+// One <Section/> per role. The roles themselves live in lib/data.js.
+
 import Section from '@/components/Section';
 import { experiences } from '@/lib/data';
 import PageTitle from '@/components/PageTitle';

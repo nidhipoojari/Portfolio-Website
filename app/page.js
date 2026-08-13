@@ -1,12 +1,5 @@
-/**
- * app/page.js — HOME
- * ------------------------------------------------------------------
- *   HERO    : name (mask-revealed word by word), role, the AI line,
- *             and the contact links
- *   MARQUEE : infinite strip of the stack
- *   ABOUT   : portrait + copy, revealed on scroll
- * ------------------------------------------------------------------
- */
+// Home. Four movements: hero, skills strip, about, ask box.
+
 import { HOME_IMAGES } from '@/lib/images';
 import { site, skills } from '@/lib/data';
 import SplitReveal from '@/components/SplitReveal';
@@ -17,7 +10,8 @@ import ThemeToggle from '@/components/ThemeToggle';
 import styles from './home.module.css';
 
 export default function HomePage() {
-  // Single hero photo on the home page.
+  // Two photos if there are two; otherwise the hero shot does double
+  // duty further down the page.
   const [hero, second] = HOME_IMAGES;
   const aboutPhoto = second || hero;
 

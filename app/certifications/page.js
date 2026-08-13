@@ -1,7 +1,7 @@
-/**
- * app/certifications/page.js
- * Simple grid of certificate cards with icon + link.
- */
+// Grid of certificate cards. The whole card is the link, so the
+// clickable area is the card and not just the "View Certificate" text
+// at the bottom of it.
+
 import { certifications } from '@/lib/data';
 import PageTitle from '@/components/PageTitle';
 import Reveal from '@/components/Reveal';

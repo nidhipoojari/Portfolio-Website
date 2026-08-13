@@ -1,16 +1,10 @@
-/**
- * scripts/copy-images.js
- * ------------------------------------------------------------------
- * Copies every file from /images  ->  /public/images
- *
- * Why? Next.js only serves files placed under the `public/` folder
- * at the URL root (e.g. /images/foo.jpeg). Your original photos live
- * in /images at the project root, so we mirror them into /public.
- *
- * Run it with:   npm run copy-images
- * (It is also safe to run repeatedly; it overwrites existing files.)
- * ------------------------------------------------------------------
- */
+// Mirrors /images into /public/images.
+//
+// Next only serves what sits under public/, but I keep originals in a
+// plain /images folder at the project root while sorting through them.
+// This is the bridge between the two. Run `npm run copy-images`; it
+// overwrites, so running it twice is harmless.
+
 const fs = require('fs');
 const path = require('path');
 

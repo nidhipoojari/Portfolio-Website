@@ -1,9 +1,10 @@
-/* ============================================================
-   globals.css  —  Site-wide black & white minimal theme
-   ------------------------------------------------------------
-   - CSS custom properties (variables) make the palette easy to tweak.
-   - Forum is loaded from Google Fonts in app/layout.js and applied here.
-   ============================================================ */
+/* The whole design system: tokens, reset, and the handful of classes
+   shared across pages.
+
+   Strictly monochrome — hierarchy comes from value and scale, never
+   hue. Every colour on the site is one of the custom properties below,
+   which is what makes light mode a matter of redefining twelve values
+   instead of auditing every stylesheet. */
 
 :root {
   color-scheme: dark;
@@ -111,13 +112,11 @@ p { margin: 0 0 1em 0; }
   filter: grayscale(100%) contrast(1.05);
 }
 
-/* ============================================================
-   MOTION
-   ------------------------------------------------------------
-   Rule for this aesthetic: motion reveals, it never decorates.
-   Everything is <= 700ms and ease-out. All of it collapses to
-   nothing under prefers-reduced-motion (bottom of this file).
-   ============================================================ */
+/* ---------- MOTION ----------
+   The rule I held myself to: motion reveals, it never decorates.
+   Nothing runs longer than 700ms, everything eases out, and the whole
+   lot collapses under prefers-reduced-motion at the bottom of this
+   file. */
 
 html { scroll-behavior: smooth; }
 
@@ -184,12 +183,10 @@ html.js .reveal[data-shown='true'] {
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
 
-/* ============================================================
-   REDUCED MOTION
-   ------------------------------------------------------------
-   One global opt-out. Reveals resolve to their final state
-   rather than never firing, so no content is left hidden.
-   ============================================================ */
+/* ---------- REDUCED MOTION ----------
+   One opt-out for the entire site. Note that reveals resolve to their
+   final state instead of simply never firing — skipping the animation
+   must not mean skipping the content. */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
 
