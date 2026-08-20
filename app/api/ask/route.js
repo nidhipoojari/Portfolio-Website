@@ -95,7 +95,7 @@ export async function POST(request) {
     // URL points somewhere else — OpenAI just ignores them.
     defaultHeaders: {
       'HTTP-Referer': 'https://nidhipoojari.vercel.app',
-      'X-Title': 'Nidhi Poojari — Portfolio',
+      'X-Title': 'Nidhi Poojari - Portfolio',
     },
   });
 
