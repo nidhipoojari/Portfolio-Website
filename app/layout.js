@@ -5,6 +5,7 @@ import { Forum } from 'next/font/google';
 import Nav from '@/components/Nav';
 import Cursor from '@/components/Cursor';
 import PageTransition from '@/components/PageTransition';
+import { site } from '@/lib/data';
 import './globals.css';
 
 // next/font downloads Forum at build time and serves it from our own
@@ -17,11 +18,13 @@ const forum = Forum({
   variable: '--font-forum',
 });
 
+// Derived from lib/data.js rather than restated. The title used to
+// hardcode the role, which meant changing it in one place left the tab
+// and the search result showing the old one.
 export const metadata = {
   metadataBase: new URL('https://nidhipoojari.vercel.app'),
-  title: 'Nidhi Poojari — Full Stack Engineer',
-  description:
-    'Full Stack Engineer building production web apps with an AI layer — React, Next.js, Node, FastAPI, LLM agents and RAG.',
+  title: `${site.name} — ${site.role}`,
+  description: `${site.role}. Production web apps with an AI layer — React, Next.js, Node, FastAPI, LLM agents and RAG.`,
 };
 
 /**
