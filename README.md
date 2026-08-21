@@ -126,39 +126,43 @@ The result is a site that loads fast, degrades cleanly with JavaScript off, resp
 ## 🏗️ Architecture
 
 ```mermaid
-graph TD
-    subgraph CONTENT ["Content Layer — edit here, it updates everywhere"]
-        D["lib/data.js<br/>experience · education · projects<br/>certifications · interests · site"]
+flowchart TD
+    subgraph content["Content layer - edit here, it updates everywhere"]
+        D["lib/data.js<br/>experience, education, projects,<br/>certifications, interests, site"]
         I["lib/images.js<br/>explicit photo registry"]
-        C["lib/corpus.js<br/>flattens data.js → plain-text profile"]
+        C["lib/corpus.js<br/>flattens data.js into a plain-text profile"]
     end
-    subgraph APP ["Next.js 14 App Router — React Server Components"]
-        L["app/layout.js<br/>Nav · theme script · motion chrome"]
-        R["7 routes<br/>/ · experience · education · extracurricular<br/>projects · certifications · interests"]
+    subgraph app["Next.js 14 App Router - React Server Components"]
+        L["app/layout.js<br/>Nav, theme script, motion chrome, analytics"]
+        R["7 routes<br/>home, experience, education, extracurricular,<br/>projects, certifications, interests"]
     end
-    subgraph UI ["Client Components — hand-built, zero UI deps"]
+    subgraph ui["Client components - hand-built, zero UI deps"]
         S["Section + Carousel"]
-        M["SplitReveal · Reveal · PageTransition · Marquee · Cursor"]
+        M["SplitReveal, Reveal, PageTransition,<br/>TransitionLink, Marquee, Cursor, SmoothScroll"]
+        F["Pipeline + InterferenceFigure<br/>scroll-driven project figures"]
         T["AskTerminal"]
     end
-    subgraph API ["Route Handlers — server only"]
-        RT["POST /api/ask<br/>rate limit → validate → stream"]
+    subgraph api["Route handlers - server only"]
+        RT["POST /api/ask<br/>rate limit, validate, stream"]
         H["GET /api/health<br/>keyConfigured probe"]
     end
-    CL["OpenRouter<br/>OpenAI-compatible · gpt-4o-mini"]
+    CL["OpenRouter<br/>OpenAI-compatible, gpt-4o-mini"]
+    UM["Umami<br/>privacy analytics, no cookies"]
 
-    D --> R
     I --> D
     D --> C
+    D --> R
     L --> R
     R --> S
     R --> M
+    R --> F
     R --> T
-    T -->|"fetch, streamed text"| RT
-    C -->|"system prompt"| RT
-    RT -->|"openai client"| CL
-    CL -->|"content deltas"| RT
-    RT -->|"ReadableStream"| T
+    L --> UM
+    T -->|streamed text| RT
+    C -->|system prompt| RT
+    RT -->|openai client| CL
+    CL -->|content deltas| RT
+    RT -->|ReadableStream| T
 ```
 
 **The ask-terminal request path, end to end:**
