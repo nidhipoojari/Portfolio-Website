@@ -10,6 +10,7 @@
     "copy-images": "node scripts/copy-images.js"
   },
   "dependencies": {
+    "lenis": "^1.3.26",
     "next": "14.2.5",
     "openai": "^7.4.0",
     "react": "18.3.1",

@@ -6,6 +6,7 @@ import Nav from '@/components/Nav';
 import Cursor from '@/components/Cursor';
 import PageTransition from '@/components/PageTransition';
 import Analytics from '@/components/Analytics';
+import SmoothScroll from '@/components/SmoothScroll';
 import { site } from '@/lib/data';
 import './globals.css';
 
@@ -66,11 +67,15 @@ export default function RootLayout({ children }) {
           <PageTransition>{children}</PageTransition>
         </main>
 
-        {/* Motion chrome — all pointer-inert, all reduced-motion aware. */}
+        {/* Motion chrome — all pointer-inert, all reduced-motion aware.
+            The progress hairline is driven entirely by a CSS scroll
+            timeline; there is no script behind it. */}
+        <div className="progress" aria-hidden="true" />
         <div className="grain" aria-hidden="true" />
         <div className="vignette" aria-hidden="true" />
         <Cursor />
 
+        <SmoothScroll />
         <Analytics />
       </body>
     </html>

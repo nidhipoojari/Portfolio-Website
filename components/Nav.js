@@ -7,7 +7,7 @@
 // more like a mistake.
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import Link from '@/components/TransitionLink';
 import { usePathname } from 'next/navigation';
 import styles from './Nav.module.css';
 
@@ -70,7 +70,7 @@ export default function Nav() {
 
   return (
     <>
-      <nav className={styles.nav}>
+      <nav className={`${styles.nav} vtStable`}>
         <Link href="/" className={styles.brand}>NP</Link>
 
         <ul className={styles.list}>

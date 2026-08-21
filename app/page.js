@@ -72,7 +72,7 @@ export default function HomePage() {
         {/* ---------- RIGHT ---------- */}
         <div className={styles.right}>
           <Reveal className={styles.circle} delay={180}>
-            <img src={hero} alt="Nidhi" className="bw" />
+            <img src={hero} alt="Nidhi" className="bw drift" />
           </Reveal>
         </div>
       </section>

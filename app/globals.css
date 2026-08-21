@@ -120,6 +120,12 @@ p { margin: 0 0 1em 0; }
 
 html { scroll-behavior: smooth; }
 
+/* Lenis stamps these classes on <html> when it initialises. Native
+   smooth scroll and an inertial scroll library both animating the same
+   anchor jump fight each other, so the native one stands down whenever
+   Lenis is actually running. Costs nothing when it is switched off. */
+html.lenis-smooth { scroll-behavior: auto; }
+
 /* Scroll reveal.
    Hidden state is scoped to `html.js` — set by an inline script in
    layout.js — so that without JavaScript the content simply renders
@@ -138,6 +144,98 @@ html.js .reveal {
 html.js .reveal[data-shown='true'] {
   opacity: 1;
   transform: none;
+}
+
+/* ---------- Scroll-driven animation ----------
+   Driven by scroll position rather than by a clock, so there is no
+   observer, no rAF loop and no JavaScript of any kind behind either of
+   these. Supported in Chrome/Edge 115+ and Safari 26+; Firefox still has
+   it behind a flag, so both live inside @supports and degrade to a
+   static element rather than a broken one.
+
+   Note on why the .reveal system above was NOT converted to this: a
+   scroll timeline is scrubbed by position, so the animation runs
+   backwards when you scroll back up. That is a different design — the
+   reveals are meant to fire once and stay put — and IntersectionObserver
+   is the right tool for a one-shot. These two effects, on the other
+   hand, ARE position: they should track the scrollbar exactly. */
+
+/* Reading-progress hairline across the top of the viewport. */
+.progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  width: 100%;
+  z-index: 101;
+  background: var(--fg);
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  pointer-events: none;
+}
+
+@supports (animation-timeline: scroll()) {
+  .progress {
+    animation: progress-grow linear;
+    /* Explicit, and not redundant. The `animation` shorthand above sets
+       animation-duration, and CSS Animations L1 makes that 0s when it is
+       omitted — which for a scroll-driven animation means "already
+       finished", so with the default fill mode the bar snaps back to its
+       base scaleX(0) and is simply never visible. The scroll-animations
+       spec redefines the initial value as `auto`, meaning "the whole
+       timeline range", but relying on which of the two a given engine
+       implements is not worth an invisible element. Must come after the
+       shorthand. */
+    animation-duration: auto;
+    animation-fill-mode: both;
+    animation-timeline: scroll(root block);
+  }
+}
+
+@keyframes progress-grow {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+/* Slow vertical drift on imagery as it crosses the viewport. Applied on
+   the element itself, so it composes with the .reveal wrapper around it
+   without either one clobbering the other's transform. */
+@supports (animation-timeline: view()) {
+  .drift {
+    animation: drift-up linear;
+    /* Same reason as .progress above — without this the drift can
+       resolve to a static offset instead of moving. */
+    animation-duration: auto;
+    animation-fill-mode: both;
+    animation-timeline: view();
+    /* cover = the element's entire pass through the viewport, so the
+       drift is continuous instead of stopping once it is fully in. */
+    animation-range: cover 0% cover 100%;
+  }
+}
+
+@keyframes drift-up {
+  from { transform: translateY(2.5%) scale(1.04); }
+  to   { transform: translateY(-2.5%) scale(1.04); }
+}
+
+/* ---------- View transitions ----------
+   Cross-fade between routes, replacing the keyed CSS replay in
+   PageTransition for browsers that support it. See TransitionLink.js for
+   the navigation side. */
+@supports (view-transition-name: none) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 420ms;
+    animation-timing-function: var(--ease-smooth);
+  }
+
+  /* The nav is present and identical on every route, so exempting it
+     from the root snapshot stops it fading out and back in on each
+     navigation. */
+  .vtStable {
+    view-transition-name: nav;
+  }
 }
 
 /* ---------- Film grain + vignette ----------
@@ -197,6 +295,22 @@ html.js .reveal[data-shown='true'] {
   }
 
   .grain { animation: none; }
+
+  /* The blanket animation-duration override at the end of this block
+     does NOT stop a scroll-driven animation — those are progressed by
+     scroll position, not by elapsed time, so the duration is ignored.
+     They have to be detached from their timeline explicitly. */
+  .progress,
+  .drift {
+    animation: none;
+    animation-timeline: auto;
+  }
+
+  .progress { transform: scaleX(0); }
+  .drift { transform: none; }
+
+  ::view-transition-old(root),
+  ::view-transition-new(root) { animation: none; }
 
   *,
   *::before,

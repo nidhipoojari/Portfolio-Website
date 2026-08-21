@@ -16,3 +16,11 @@
 @media (prefers-reduced-motion: reduce) {
   .page { animation: none; }
 }
+
+/* Where the View Transitions API is available, TransitionLink drives the
+   route change and this replay would double up on it. The keyed-remount
+   animation stays as the fallback for everywhere else — currently
+   Firefox, which has neither this nor scroll timelines yet. */
+@supports (view-transition-name: none) {
+  .page { animation: none; }
+}
