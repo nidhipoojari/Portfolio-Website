@@ -37,13 +37,32 @@ export default function HomePage() {
           </Reveal>
 
           <Reveal className={styles.ctaRow} delay={500}>
-            <a href={`mailto:${site.email}`} className={styles.cta}>
+            <a
+              href={`mailto:${site.email}`}
+              className={styles.cta}
+              data-umami-event="contact"
+              data-umami-event-via="email"
+            >
               EMAIL ME
             </a>
-            <a href={site.github} target="_blank" rel="noreferrer" className={styles.cta}>
+            <a
+              href={site.github}
+              target="_blank"
+              rel="noreferrer"
+              className={styles.cta}
+              data-umami-event="contact"
+              data-umami-event-via="github"
+            >
               GITHUB
             </a>
-            <a href={site.linkedin} target="_blank" rel="noreferrer" className={styles.cta}>
+            <a
+              href={site.linkedin}
+              target="_blank"
+              rel="noreferrer"
+              className={styles.cta}
+              data-umami-event="contact"
+              data-umami-event-via="linkedin"
+            >
               LINKEDIN
             </a>
             <ThemeToggle />

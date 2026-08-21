@@ -40,6 +40,9 @@ export default function ProjectsPage() {
                 target="_blank"
                 rel="noreferrer"
                 className={styles.link}
+                data-umami-event="project-link"
+                data-umami-event-project={p.id}
+                data-umami-event-kind="live"
               >
                 Live ↗
               </a>
@@ -50,6 +53,9 @@ export default function ProjectsPage() {
                 target="_blank"
                 rel="noreferrer"
                 className={styles.link}
+                data-umami-event="project-link"
+                data-umami-event-project={p.id}
+                data-umami-event-kind="github"
               >
                 GitHub ↗
               </a>
@@ -60,6 +66,9 @@ export default function ProjectsPage() {
                 target="_blank"
                 rel="noreferrer"
                 className={styles.link}
+                data-umami-event="project-link"
+                data-umami-event-project={p.id}
+                data-umami-event-kind="paper"
               >
                 Paper ↗
               </a>

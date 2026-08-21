@@ -11,6 +11,7 @@
 // mismatch.
 
 import { useEffect, useState } from 'react';
+import { track } from '@/lib/analytics';
 import styles from './ThemeToggle.module.css';
 
 export default function ThemeToggle() {
@@ -25,6 +26,7 @@ export default function ThemeToggle() {
     document.documentElement.setAttribute('data-theme', next);
     localStorage.setItem('theme', next);
     setTheme(next);
+    track('theme-toggled', { to: next });
   };
 
   return (

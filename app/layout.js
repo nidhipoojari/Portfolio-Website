@@ -5,6 +5,7 @@ import { Forum } from 'next/font/google';
 import Nav from '@/components/Nav';
 import Cursor from '@/components/Cursor';
 import PageTransition from '@/components/PageTransition';
+import Analytics from '@/components/Analytics';
 import { site } from '@/lib/data';
 import './globals.css';
 
@@ -69,6 +70,8 @@ export default function RootLayout({ children }) {
         <div className="grain" aria-hidden="true" />
         <div className="vignette" aria-hidden="true" />
         <Cursor />
+
+        <Analytics />
       </body>
     </html>
   );
