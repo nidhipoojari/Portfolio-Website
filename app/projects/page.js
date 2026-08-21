@@ -7,6 +7,8 @@
 
 import Section from '@/components/Section';
 import PageTitle from '@/components/PageTitle';
+import Pipeline from '@/components/Pipeline';
+import InterferenceFigure from '@/components/InterferenceFigure';
 import { projects } from '@/lib/data';
 import styles from './projects.module.css';
 
@@ -74,6 +76,11 @@ export default function ProjectsPage() {
               </a>
             )}
           </div>
+
+          {/* Two projects carry a bespoke piece each, both showing what
+              their prose otherwise only claims. */}
+          {p.id === 'nestiq' && <Pipeline />}
+          {p.id === 'ionosphericTec' && <InterferenceFigure />}
         </Section>
       ))}
     </div>

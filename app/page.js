@@ -20,11 +20,17 @@ export default function HomePage() {
       <section className={styles.hero}>
         {/* ---------- LEFT ---------- */}
         <div className={styles.left}>
+          {/* The only heading on the site big enough for letter
+              granularity. Everything else — every PageTitle — stays on
+              words, where one letter at a time would read as a gimmick.
+              Stagger drops from 90ms to 34ms because there are now 12
+              pieces instead of 2. */}
           <SplitReveal
             as="h1"
             text="Nidhi Poojari"
+            by="char"
             stack
-            stagger={90}
+            stagger={34}
             className={styles.name}
           />
 
@@ -72,7 +78,15 @@ export default function HomePage() {
         {/* ---------- RIGHT ---------- */}
         <div className={styles.right}>
           <Reveal className={styles.circle} delay={180}>
-            <img src={hero} alt="Nidhi" className="bw drift" />
+            {/* Three transforms, three elements, on purpose. Reveal owns
+                the wrapper's, the scroll drift owns this span's, and the
+                hover zoom owns the image's. Stack any two of them onto
+                one element and the animation silently wins over the
+                hover — which is exactly what happened when the drift
+                class sat on the img. */}
+            <span className={`${styles.drifter} drift`}>
+              <img src={hero} alt="Nidhi" className="bw" />
+            </span>
           </Reveal>
         </div>
       </section>

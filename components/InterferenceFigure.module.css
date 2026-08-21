@@ -1,0 +1,31 @@
+.wrap {
+  margin: 2.25rem 0 0;
+  padding: 1.5rem 0 0;
+  border-top: 1px solid var(--line);
+}
+
+/* Bounded box rather than a full-bleed backdrop. The canvas positions
+   itself absolutely against this, so the frame is what decides how much
+   of the pattern you see. */
+.frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 21 / 8;
+  overflow: hidden;
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+}
+
+.caption {
+  margin-top: 0.85rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.66rem;
+  line-height: 1.7;
+  letter-spacing: 0.06em;
+  color: var(--fg-muted);
+  max-width: 60ch;
+}
+
+@media (max-width: 640px) {
+  .frame { aspect-ratio: 3 / 2; }
+}

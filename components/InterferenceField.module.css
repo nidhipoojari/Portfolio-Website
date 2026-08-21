@@ -1,0 +1,34 @@
+.field {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* Positioned elements paint above in-flow content, so this needs an
+     explicit level below the hero copy rather than relying on source
+     order. The hero grid items are lifted to 1 in home.module.css. */
+  z-index: 0;
+  pointer-events: none;
+  /* The only colour declaration. The component reads this back with
+     getComputedStyle, which keeps both themes driven from the CSS custom
+     properties rather than from a hardcoded canvas fillStyle. */
+  color: var(--fg-muted);
+  /* Fades the field out before it reaches the edges, so it reads as
+     something underneath the page rather than a panel bolted onto it. */
+  mask-image: radial-gradient(
+    ellipse 75% 65% at 50% 45%,
+    #000 0%,
+    transparent 78%
+  );
+  -webkit-mask-image: radial-gradient(
+    ellipse 75% 65% at 50% 45%,
+    #000 0%,
+    transparent 78%
+  );
+}
+
+/* The component bails out before touching the canvas under reduced
+   motion, so nothing is ever drawn. This just makes sure the empty
+   element cannot contribute anything of its own. */
+@media (prefers-reduced-motion: reduce) {
+  .field { display: none; }
+}

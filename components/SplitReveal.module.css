@@ -54,6 +54,22 @@
   margin-right: 0.25em;
 }
 
+/* Character mode keeps the word as the layout unit, so a line break can
+   never fall mid-word and the letters inside need no spacing of their
+   own. The word gap moves here from .mask, which in char mode sits
+   between letters instead. */
+.wordGroup {
+  display: inline-block;
+}
+
+.wordGroup:not(:last-child) {
+  margin-right: 0.25em;
+}
+
+.wordGroup .mask:not(:last-child) {
+  margin-right: 0;
+}
+
 .word {
   display: inline-block;
   transform: translateY(105%);

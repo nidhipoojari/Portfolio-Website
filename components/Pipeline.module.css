@@ -1,0 +1,171 @@
+.wrap {
+  margin: 2.25rem 0 0;
+  padding: 1.5rem 0 0;
+  border-top: 1px solid var(--line);
+}
+
+.caption {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-bottom: 1.75rem;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  color: var(--fg-display);
+}
+
+.sub {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.66rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+
+.flow {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.stage {
+  position: relative;
+}
+
+/* The connector between one stage and the next. Drawn as a scaled line
+   rather than an SVG path so there is no pathLength arithmetic and no
+   second coordinate system to keep in step with the text. */
+.stem {
+  display: block;
+  width: 1px;
+  height: 1.6rem;
+  margin-left: 0.7rem;
+  background: var(--line);
+  transform: scaleY(1);
+  transform-origin: top center;
+}
+
+.body {
+  display: grid;
+  grid-template-columns: 1.4rem minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: start;
+  opacity: 1;
+}
+
+.index {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  color: var(--fg-faint);
+  padding-top: 0.35rem;
+}
+
+.text {
+  min-width: 0;
+}
+
+.stageName {
+  margin: 0 0 0.15rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.68rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+
+.metricRow {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0 0 0.3rem;
+}
+
+/* Scale drives type size, clamped so the smallest stage is still
+   legible and the largest does not break the column. --scale is a
+   weight from lib/data.js, not a measurement. */
+.metric {
+  font-family: var(--font-display);
+  font-size: calc(1.35rem + (var(--scale, 0.3) * 1.5rem));
+  line-height: 1.05;
+  color: var(--fg-display);
+  font-variant-numeric: tabular-nums;
+}
+
+.unit {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  color: var(--fg-muted);
+}
+
+.note {
+  margin: 0;
+  max-width: 56ch;
+  font-size: 0.86rem;
+  line-height: 1.6;
+  color: var(--fg-soft);
+}
+
+@supports (animation-timeline: view()) {
+  /* Each element carries its own view timeline, so a stage assembles as
+     it enters rather than every stage firing off one shared trigger.
+     Stagger comes free from the stages sitting at different heights. */
+  .stem {
+    animation: stem-draw linear;
+    /* Explicit: the shorthand resolves duration to 0s, which for a
+       scroll-driven animation means "already finished". Same trap as
+       .progress in globals.css. */
+    animation-duration: auto;
+    animation-fill-mode: both;
+    animation-timeline: view();
+    animation-range: cover 22% cover 48%;
+  }
+
+  .body {
+    animation: stage-in linear;
+    animation-duration: auto;
+    animation-fill-mode: both;
+    animation-timeline: view();
+    animation-range: cover 25% cover 55%;
+  }
+}
+
+@keyframes stem-draw {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+
+@keyframes stage-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Scroll-driven animations are progressed by position, not elapsed
+     time, so the global animation-duration override does not reach them.
+     Detach both and let the assembled resting state stand. */
+  .stem,
+  .body {
+    animation: none;
+    animation-timeline: auto;
+  }
+
+  .stem { transform: scaleY(1); }
+  .body { opacity: 1; transform: none; }
+}
+
+@media (max-width: 640px) {
+  .body {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.15rem;
+  }
+
+  .index { display: none; }
+  .stem { margin-left: 0; }
+}

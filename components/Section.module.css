@@ -14,7 +14,14 @@
   grid-template-columns: minmax(0, 62ch);
 }
 
-.text { position: relative; }
+.text {
+  position: relative;
+  /* Grid items default to min-width:auto, so this column refuses to
+     shrink below its min-content width — and one unbreakable child is
+     enough to blow the track out and starve the media column of every
+     pixel it had. Costs nothing here because the copy wraps anyway. */
+  min-width: 0;
+}
 
 .index {
   font-family: var(--font-display);

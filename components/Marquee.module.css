@@ -53,6 +53,38 @@
 
 .item:hover { color: var(--fg); }
 
+/* ---------- Tape variant ----------
+   Reads as a ticker rather than a banner: tighter, monospaced, and
+   punctuated by tick marks so the strip has a rhythm instead of just
+   drifting. Only the treatment differs — the seamless loop above is
+   shared. */
+.tape {
+  padding: 0.65rem 0;
+}
+
+.tape .list {
+  gap: 2.25rem;
+}
+
+.tape .item {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  color: var(--fg-soft);
+}
+
+/* The tick before each entry. Decorative, so it is generated content
+   rather than markup — it must never reach a screen reader as text. */
+.tape .item::before {
+  content: '';
+  display: inline-block;
+  width: 1px;
+  height: 0.72em;
+  margin-right: 1.15rem;
+  background: var(--line);
+  vertical-align: -0.04em;
+}
+
 @keyframes scroll {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
