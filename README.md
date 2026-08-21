@@ -28,7 +28,7 @@ Two constraints shaped every decision:
 | Constraint | What it meant in practice |
 |---|---|
 | **Ship it on a stack I've actually used in production** | No React Three Fiber, no experimental flags. Next.js App Router and plain React — the same things I write at work. |
-| **No dependency I could write myself in an afternoon** | The carousel, the scroll reveals, the word-by-word heading reveal, the marquee, the cursor and the page transitions are all hand-rolled. `package.json` has **four** runtime dependencies, and one of them is React. |
+| **No dependency I could write myself in an afternoon** | The carousel, the scroll reveals, the heading reveals, the marquee, the cursor, the page transitions, the scroll-driven figures and the canvas field are all hand-rolled. `package.json` has **five** runtime dependencies, one of them is React, and the only one I didn't write is Lenis — inertial scroll is genuinely harder than it looks. |
 
 The result is a site that loads fast, degrades cleanly with JavaScript off, respects `prefers-reduced-motion`, and gave me a place to put a small piece of AI engineering that isn't a chatbot demo.
 
@@ -40,7 +40,12 @@ The result is a site that loads fast, degrades cleanly with JavaScript off, resp
 |---|---|
 | 💬 **Ask terminal** | A monospace command line where a visitor can ask *"does she have production experience at scale?"* and get a streamed, grounded answer — **gpt-4o-mini via OpenRouter**, with the whole site as its context. |
 | 🖼️ **Hand-built carousel** | Arrows, dots, keyboard nav, pointer-event swipe, two aspect-ratio variants. No Swiper, no Embla, ~180 lines. |
-| 🎞️ **Motion primitives** | `SplitReveal` (word-by-word mask reveal), `Reveal` (IntersectionObserver fade-up), `PageTransition` (route-change fade). CSS animations, no Framer Motion. |
+| 🎞️ **Motion primitives** | `SplitReveal` (word- **or letter-by-letter** mask reveal), `Reveal` (IntersectionObserver fade-up), `PageTransition` (route-change fade). CSS animations, no Framer Motion. |
+| 📉 **CSS scroll-driven animation** | A reading-progress hairline and an image drift, both on `animation-timeline`. **Zero JavaScript, zero bytes** — behind `@supports`, with the existing observers as the fallback. |
+| 🔀 **View Transitions API** | Real cross-fades between routes, hand-rolled in `TransitionLink` with no library and no experimental flag. The nav is exempted from the snapshot so it never flickers. |
+| 🪶 **Inertial smooth scroll** | Lenis, dynamically imported into its own lazy chunk, behind an env switch and off entirely under reduced motion. |
+| 📊 **Project figures** | Two bespoke pieces that show what the prose claims: a NestIQ pipeline that assembles on scroll (49 rows → 245,000 listings), and a live plane-wave interference field for the ionospheric TEC project. |
+| 📈 **Privacy analytics** | Umami — no cookies, no consent banner. Instrumented for ask-box latency and failures, contact clicks and project links; injects nothing at all when unconfigured. |
 | 🌗 **Flash-free theming** | Light/dark stored in `localStorage` and applied by a blocking inline script *before* first paint, so there's no white flash on a dark-mode reload. |
 | 🖱️ **Difference-blend cursor** | A dot that inverts whatever it passes over via `mix-blend-mode: difference`. Only mounts for fine pointers, never for reduced-motion visitors. |
 | 📝 **One content file** | Every word on the site lives in `lib/data.js`. Adding a job is an object literal, not a JSX edit. |
@@ -63,11 +68,14 @@ The result is a site that loads fast, degrades cleanly with JavaScript off, resp
 </td><td valign="top" width="50%">
 
 **Animation & Interaction (all hand-written)**
-- Mask-reveal display type with per-word `animationDelay` stagger
+- Mask-reveal display type with per-word *or per-letter* `animationDelay` stagger
+- **CSS scroll-driven animations** — `animation-timeline: scroll()` and `view()`, progressively enhanced behind `@supports`
+- **View Transitions API** for route changes, resolving `startViewTransition` against a real render rather than a fire-and-forget push
 - `IntersectionObserver` scroll reveals with above-the-fold handling
 - Pointer-event swipe/drag with axis-intent detection
 - `requestAnimationFrame` lerp for the trailing cursor
-- Seamless CSS marquee (duplicated track, `-50%` translate)
+- **Canvas 2D plane-wave field** with the trig hoisted out of the inner loop via angle addition, throttled and paused off-screen
+- Seamless CSS marquee (duplicated track, `-50%` translate), two variants
 - Shared easing curves as custom properties
 
 </td></tr>
@@ -104,6 +112,7 @@ The result is a site that loads fast, degrades cleanly with JavaScript off, resp
 
 **Tooling & Delivery**
 - **Vercel** — push-to-`main` CI/CD, preview deployments per branch
+- **Umami** privacy analytics with declarative `data-umami-event` click tracking and a programmatic path where a handler already owns the click
 - Environment-based config with a committed `.env.local.example`
 - `jsconfig.json` path aliases (`@/components`, `@/lib`)
 - Node utility script for staging image assets
@@ -208,20 +217,27 @@ Light mode redefines the same tokens in the same warm-neutral hue family, invert
 │   ├── AskTerminal.js         Streaming Q&A command line
 │   ├── Carousel.js            Arrows · dots · keyboard · swipe, no library
 │   ├── Section.js             Two-column copy + media block, reused by 5 pages
-│   ├── SplitReveal.js         Word-by-word mask reveal for display type
+│   ├── SplitReveal.js         Word- or letter-by-letter mask reveal
 │   ├── Reveal.js              IntersectionObserver fade-up
-│   ├── PageTransition.js      Route-change fade, keyed on pathname
-│   ├── Marquee.js             Seamless CSS skills strip
+│   ├── PageTransition.js      Route-change fade — the pre-View-Transitions path
+│   ├── TransitionLink.js      next/link wrapped in startViewTransition
+│   ├── SmoothScroll.js        Lenis, lazy-imported, env-switched
+│   ├── Marquee.js             Seamless CSS strip — skills, and the BSE tape
+│   ├── Pipeline.js            NestIQ pipeline, assembles on scroll
+│   ├── InterferenceField.js   Canvas plane-wave field
+│   ├── InterferenceFigure.js  That field, framed and captioned
+│   ├── Analytics.js           Umami tracker, only when configured
 │   ├── Cursor.js              Difference-blend trailing dot
 │   ├── Nav.js                 Desktop links + full-screen mobile panel
 │   └── ThemeToggle.js         Light/dark, persisted to localStorage
 ├── lib/
 │   ├── data.js                ★ Every word on the site lives here
 │   ├── images.js              Explicit photo registry per section
+│   ├── analytics.js           Best-effort wrapper around the Umami tracker
 │   └── corpus.js              data.js → plain-text profile for the LLM
 ├── public/images/             Served photos, one folder per section
 ├── scripts/copy-images.js     Stages new photos into public/images
-└── .env.local.example         The one env var this project takes
+└── .env.local.example         Every env var this project takes
 ```
 
 ---
@@ -251,6 +267,20 @@ OPENAI_API_KEY=sk-or-v1-...
 # Both optional — these are the defaults.
 OPENAI_BASE_URL=https://openrouter.ai/api/v1
 AI_MODEL=openai/gpt-4o-mini
+```
+
+Everything below is optional too, and each one is inert when unset:
+
+```dotenv
+# Umami analytics. No id, no tracker injected at all — which is how
+# local development stays out of the numbers.
+NEXT_PUBLIC_UMAMI_WEBSITE_ID=
+# Restrict collection to these hosts, so a copy running anywhere else
+# is ignored by the tracker itself.
+NEXT_PUBLIC_UMAMI_DOMAINS=
+
+# Inertial smooth scroll. Anything other than "off" leaves it on.
+NEXT_PUBLIC_SMOOTH_SCROLL=off
 ```
 
 Get a key at [openrouter.ai/keys](https://openrouter.ai/keys). Without it the box politely tells visitors to email me instead — nothing else on the site depends on it.
@@ -371,10 +401,10 @@ Every non-`main` branch gets its own preview URL, which is how the copy on this 
 | Route | Contents |
 |---|---|
 | `/` | Hero, skills marquee, about, ask terminal |
-| `/experience` | Roles, with the stack used at each |
+| `/experience` | Roles, with the stack used at each, and the BSE tape |
 | `/education` | Degrees and institutions |
 | `/extracurricular` | Leadership and volunteering |
-| `/projects` | Selected work — live, GitHub and paper links |
+| `/projects` | Selected work — live, GitHub and paper links, plus the NestIQ pipeline and the TEC interference field |
 | `/certifications` | CKA, LFCS, Jenkins, FastAPI, DevOps, Shell |
 | `/interests` | Cooking, painting, tennis — the non-engineer half |
 
