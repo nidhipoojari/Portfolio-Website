@@ -2,7 +2,7 @@ import Section from '@/components/Section';
 import { extracurricular } from '@/lib/data';
 import PageTitle from '@/components/PageTitle';
 
-export const metadata = { title: 'Extracurricular — Nidhi Poojari' };
+export const metadata = { title: 'Extracurricular - Nidhi Poojari' };
 
 export default function ExtracurricularPage() {
   return (
@@ -12,12 +12,14 @@ export default function ExtracurricularPage() {
       {extracurricular.map((x, idx) => (
         <Section
           key={x.id}
+          id={x.id}
           index={idx + 1}
           title={x.title}
           subtitle={x.org}
           period={x.period}
           description={x.description}
           images={x.images}
+          mediaVariant={x.mediaVariant}
         />
       ))}
     </div>

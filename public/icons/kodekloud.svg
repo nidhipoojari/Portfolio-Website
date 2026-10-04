@@ -1,17 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 140" role="img" aria-label="KodeKloud">
-  <defs>
-    <linearGradient id="kkCloud" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%"  stop-color="#3FD1E7"/>
-      <stop offset="100%" stop-color="#2A5BD7"/>
-    </linearGradient>
-  </defs>
-  <!-- Cloud silhouette -->
-  <path fill="url(#kkCloud)"
-        d="M52 118c-23 0-42-17-42-38 0-19 15-34 34-36 5-23 26-40 51-40 29 0 52 23 52 52 0 2 0 4-1 6 19 2 34 17 34 36 0 21-19 38-42 38H52z"/>
-  <!-- Code brackets </> -->
-  <g fill="none" stroke="#0c1733" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
-    <polyline points="82,56 64,76 82,96"/>
-    <polyline points="118,56 136,76 118,96"/>
-    <line x1="108" y1="50" x2="92" y2="102"/>
-  </g>
+<svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M5.72803 22.7323C5.72803 18.9755 8.85856 17.9022 10.558 17.9022C10.7071 15.8748 12.7047 11.5633 17.2663 10.8361C22.2037 10.0489 25.0182 13.3107 25.9425 15.04C28.1785 15.04 32.2035 16.65 32.2035 21.5693C32.2035 25.6838 28.4468 27.0552 26.5685 27.2938H9.57412C8.23246 27.2044 5.72803 25.505 5.72803 22.7323ZM26.0318 19.079C26.0318 23.1296 22.7479 26.4135 18.6973 26.4135C14.6466 26.4135 11.3629 23.1296 11.3629 19.079C11.3629 15.0283 14.6466 11.7446 18.6973 11.7446C22.7479 11.7446 26.0318 15.0283 26.0318 19.079ZM17.8926 16.3393L15.1527 19.0792L17.8926 21.8192L17.2077 22.504L13.7828 19.0792L17.2077 15.6543L17.8926 16.3393ZM19.5022 16.3393L22.2421 19.0792L19.5022 21.8192L20.1871 22.504L23.612 19.0792L20.1871 15.6543L19.5022 16.3393Z" fill="url(#paint0_linear_882_15316)"/>
+<defs>
+<linearGradient id="paint0_linear_882_15316" x1="32.2035" y1="10.7156" x2="10.3387" y2="32.0247" gradientUnits="userSpaceOnUse">
+<stop stop-color="#95E4B7"/>
+<stop offset="0.483932" stop-color="#10C1DF"/>
+<stop offset="1" stop-color="#1C88D6"/>
+</linearGradient>
+</defs>
 </svg>

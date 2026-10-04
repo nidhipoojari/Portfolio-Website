@@ -8,6 +8,7 @@ import Reveal from './Reveal';
 import styles from './Section.module.css';
 
 export default function Section({
+  id,
   index,
   title,
   subtitle,
@@ -16,6 +17,9 @@ export default function Section({
   description = [],
   images = [],
   mediaVariant = 'portrait',
+  // Media above the copy in one column, for narrow containers such as
+  // the Extracurricular details pane. Off everywhere else.
+  stacked = false,
   children,
 }) {
   // No photos means no media column at all — the copy runs full width
@@ -25,12 +29,16 @@ export default function Section({
   return (
     <Reveal
       as="article"
-      className={`${styles.section} ${hasMedia ? '' : styles.textOnly}`}
+      id={id}
+      className={`${styles.section} ${hasMedia ? '' : styles.textOnly} ${stacked ? styles.stacked : ''}`}
     >
       <div className={styles.text}>
-        {typeof index === 'number' && (
+        {/* A number is zero-padded here. Anything else (the Experience
+            page passes a CSS-counter span, so filtered lists renumber)
+            is rendered as given. */}
+        {index != null && (
           <span className={styles.index}>
-            {String(index).padStart(2, '0')}
+            {typeof index === 'number' ? String(index).padStart(2, '0') : index}
           </span>
         )}
         <h2 className={styles.title}>{title}</h2>

@@ -47,6 +47,9 @@ export default function SmoothScroll() {
         smoothWheel: true,
         syncTouch: false,
       });
+      // So components that scroll the page on purpose (InterestOrbit)
+      // go through Lenis instead of fighting it.
+      window.__lenis = lenis;
 
       const raf = (time) => {
         lenis.raf(time);
@@ -59,6 +62,7 @@ export default function SmoothScroll() {
       cancelled = true;
       if (frame) cancelAnimationFrame(frame);
       lenis?.destroy();
+      if (window.__lenis === lenis) delete window.__lenis;
     };
   }, []);
 

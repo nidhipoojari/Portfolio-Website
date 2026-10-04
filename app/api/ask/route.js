@@ -1,6 +1,14 @@
 // The endpoint behind the ask box. Question in, plain text out,
 // streamed, grounded in lib/data.js.
 //
+// The model is asked to finish with one metadata line — the jobs and
+// projects it drew on, and three follow-up questions. That line never
+// reaches the browser as text. The prose streams through untouched; the
+// metadata is cut off at the marker, validated here, and sent last as a
+// single frame after an ASCII record separator (META_SEPARATOR). The
+// client splits on that one character. A model that skips the line, or
+// mangles it, costs the links and follow-ups and nothing else.
+//
 // Provider is OpenRouter through its OpenAI-compatible API, which
 // means the official openai client works unchanged — only the base URL
 // differs. Point OPENAI_BASE_URL at api.openai.com and this talks to
@@ -10,7 +18,7 @@
 // the server — the key never gets near the browser bundle.
 
 import OpenAI from 'openai';
-import { SYSTEM_PROMPT } from '@/lib/corpus';
+import { SYSTEM_PROMPT, REFS, META_MARKER } from '@/lib/corpus';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -18,6 +26,65 @@ export const dynamic = 'force-dynamic';
 const BASE_URL = process.env.OPENAI_BASE_URL || 'https://openrouter.ai/api/v1';
 const MODEL = process.env.AI_MODEL || 'openai/gpt-4o-mini';
 const MAX_QUESTION_CHARS = 400;
+const META_SEPARATOR = '\u001e';
+const MAX_REFS = 3;
+const MAX_FOLLOWUPS = 3;
+const MAX_FOLLOWUP_CHARS = 120;
+
+// How much of the tail of `text` could still turn out to be the start of
+// the marker once the next chunk lands. That much has to be held back —
+// a chunk boundary can fall anywhere, including mid-marker. Trailing
+// whitespace is held too, so the newline before the marker never makes
+// it out as a dangling blank line under the answer.
+function holdBack(text) {
+  let keep = 0;
+  for (let k = Math.min(META_MARKER.length - 1, text.length); k > 0; k--) {
+    if (META_MARKER.startsWith(text.slice(-k))) {
+      keep = k;
+      break;
+    }
+  }
+  let cut = text.length - keep;
+  while (cut > 0 && /\s/.test(text[cut - 1])) cut--;
+  return cut;
+}
+
+// Everything the model wrote after the marker, reduced to what is safe
+// to render. Refs are looked up, never trusted; follow-ups are trimmed,
+// capped, and deduped. Anything malformed becomes an empty list.
+function parseMeta(raw, question) {
+  const start = raw.indexOf('{');
+  const end = raw.lastIndexOf('}');
+  if (start === -1 || end <= start) return null;
+
+  let parsed;
+  try {
+    parsed = JSON.parse(raw.slice(start, end + 1));
+  } catch {
+    return null;
+  }
+
+  const refs = [];
+  for (const id of Array.isArray(parsed.refs) ? parsed.refs : []) {
+    const ref = typeof id === 'string' && REFS.get(id.trim());
+    if (ref && !refs.some((r) => r.href === ref.href)) refs.push(ref);
+    if (refs.length === MAX_REFS) break;
+  }
+
+  const seen = new Set([question.toLowerCase()]);
+  const followups = [];
+  for (const q of Array.isArray(parsed.followups) ? parsed.followups : []) {
+    if (typeof q !== 'string') continue;
+    const clean = q.trim();
+    if (!clean || clean.length > MAX_FOLLOWUP_CHARS) continue;
+    if (seen.has(clean.toLowerCase())) continue;
+    seen.add(clean.toLowerCase());
+    followups.push(clean);
+    if (followups.length === MAX_FOLLOWUPS) break;
+  }
+
+  return { refs, followups };
+}
 
 // Fixed window per IP, held in memory. Being honest about what this
 // is: it lives in one instance and resets on cold start, so it slows
@@ -88,13 +155,15 @@ export async function POST(request) {
     return text(`Keep it under ${MAX_QUESTION_CHARS} characters.`, 400);
   }
 
+  const asked = question.trim();
+
   const client = new OpenAI({
     baseURL: BASE_URL,
     apiKey: process.env.OPENAI_API_KEY,
     // OpenRouter attributes traffic with these. Harmless when the base
     // URL points somewhere else — OpenAI just ignores them.
     defaultHeaders: {
-      'HTTP-Referer': 'https://nidhipoojari.vercel.app',
+      'HTTP-Referer': 'https://nidhipoojari.com',
       'X-Title': 'Nidhi Poojari - Portfolio',
     },
   });
@@ -122,7 +191,7 @@ export async function POST(request) {
         // provider's automatic prompt caching hit at all — put the
         // question above it and there is nothing stable left to cache.
         { role: 'system', content: SYSTEM_PROMPT },
-        { role: 'user', content: question.trim() },
+        { role: 'user', content: asked },
       ],
     });
   } catch (error) {
@@ -141,6 +210,18 @@ export async function POST(request) {
       let wroteSomething = false;
       let stopReason = null;
 
+      // Prose not yet sent, because its tail might be the marker.
+      let pending = '';
+      // Everything after the marker, once it has been seen.
+      let meta = null;
+
+      const flush = (upTo) => {
+        if (upTo <= 0) return;
+        wroteSomething = true;
+        send(pending.slice(0, upTo));
+        pending = pending.slice(upTo);
+      };
+
       try {
         for await (const chunk of stream) {
           const choice = chunk.choices?.[0];
@@ -148,12 +229,28 @@ export async function POST(request) {
 
           if (choice.finish_reason) stopReason = choice.finish_reason;
 
-          const delta = choice.delta?.content;
-          if (delta) {
-            wroteSomething = true;
-            send(delta);
+          // The separator is the framing, so it can never be content.
+          const delta = choice.delta?.content?.replaceAll(META_SEPARATOR, '');
+          if (!delta) continue;
+
+          if (meta !== null) {
+            meta += delta;
+            continue;
+          }
+
+          pending += delta;
+          const at = pending.indexOf(META_MARKER);
+          if (at !== -1) {
+            meta = pending.slice(at + META_MARKER.length);
+            pending = pending.slice(0, at).trimEnd();
+            flush(pending.length);
+          } else {
+            flush(holdBack(pending));
           }
         }
+
+        pending = pending.trimEnd();
+        flush(pending.length);
 
         // A declined request is not an exception — it comes back as a
         // perfectly successful stream that simply carries no content,
@@ -164,6 +261,9 @@ export async function POST(request) {
               ? "I can't answer that one. Ask me about Nidhi's work, projects, or background instead."
               : 'The assistant had nothing to say to that. Try rephrasing, or email Nidhi at nidhipoojari702@gmail.com.'
           );
+        } else if (meta !== null) {
+          const parsed = parseMeta(meta, asked);
+          if (parsed) send(META_SEPARATOR + JSON.stringify(parsed));
         }
       } catch (error) {
         console.error('[ask] stream failed:', error);

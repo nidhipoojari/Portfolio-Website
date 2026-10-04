@@ -1,7 +1,7 @@
 'use client';
 // Top nav — text links only, no logo, no buttons.
 //
-// Under 720px the inline list becomes a Menu/Close toggle over a
+// Under 1040px the inline list becomes a Menu/Close toggle over a
 // full-screen panel. Seven links at 0.7rem used to wrap into three
 // stacked rows on a phone, which looked less like a navigation and
 // more like a mistake.
@@ -13,11 +13,12 @@ import styles from './Nav.module.css';
 
 const links = [
   { href: '/',                label: 'Home' },
+  { href: '/projects',        label: 'Projects' },
   { href: '/experience',      label: 'Experience' },
   { href: '/education',       label: 'Education' },
-  { href: '/extracurricular', label: 'Extracurricular' },
-  { href: '/projects',        label: 'Projects' },
+  { href: '/publications',    label: 'Publications' },
   { href: '/certifications',  label: 'Certifications' },
+  { href: '/extracurricular', label: 'Extracurricular' },
   { href: '/interests',       label: 'Interests' },
 ];
 

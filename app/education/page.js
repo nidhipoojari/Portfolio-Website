@@ -1,8 +1,9 @@
 import Section from '@/components/Section';
 import { education } from '@/lib/data';
 import PageTitle from '@/components/PageTitle';
+import Coursework from '@/components/Coursework';
 
-export const metadata = { title: 'Education — Nidhi Poojari' };
+export const metadata = { title: 'Education - Nidhi Poojari' };
 
 export default function EducationPage() {
   return (
@@ -19,7 +20,9 @@ export default function EducationPage() {
           period={e.period}
           description={e.description}
           images={e.images}
-        />
+        >
+          {e.coursework && <Coursework items={e.coursework} icon={e.courseIcon} />}
+        </Section>
       ))}
     </div>
   );

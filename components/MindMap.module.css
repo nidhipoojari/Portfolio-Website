@@ -1,0 +1,564 @@
+/* ============================================================
+   MindMap: the Projects split view.
+   Left, a tree drawn in hairlines: hub, branches, nodes. The path
+   from the hub to the picked node lights up a segment at a time, and
+   a wire runs from that node across to the details. Right, the entry.
+   Monochrome like the rest of the site; everything that lights up is
+   just --line becoming --fg.
+   ============================================================ */
+
+.split {
+  --split-gap: clamp(2.5rem, 5vw, 4.5rem);
+  /* The tree is sized to the screen: type follows the width, row
+     spacing follows the height, so the whole map fills the column
+     beside the details without ever needing its own scroll.
+     Type is set by line box (--*-lh) so the connectors can find the
+     middle of each label: half its line box plus the row's padding. */
+  /* Type grows with the width but is held back on short screens (the
+     vh term), so the pinned map still fits a 720px-tall laptop. The
+     padding here is only the minimum gap: the map is stretched to the
+     screen's height and the rest of the room goes between the nodes
+     (see .map below). */
+  --group-lh: clamp(1.9rem, min(3.5vw, 5.4vh), 3.4rem);
+  --group-pad: clamp(1rem, 3vh, 2rem);
+  --group-mid: calc(var(--group-pad) + var(--group-lh) / 2);
+  --node-lh: clamp(1.55rem, min(2.6vw, 3.9vh), 2.6rem);
+  --node-pad: clamp(0.7rem, 2vh, 1.4rem);
+  /* Connector weight. */
+  --stroke: 2px;
+  --node-mid: calc(var(--node-pad) + var(--node-lh) / 2);
+
+  display: grid;
+  grid-template-columns: minmax(340px, 1.3fr) minmax(0, 1.45fr);
+  gap: var(--split-gap);
+  align-items: start;
+  padding-top: 2.5rem;
+  border-top: 1px solid var(--line);
+}
+
+/* ---------- The map ---------- */
+.aside {
+  position: sticky;
+  top: 6.5rem;
+}
+
+/* As tall as the screen below the nav, pinned. Each level is a flex
+   column, so the height left over after the labels is shared out as
+   longer connectors between the nodes: the map runs top to bottom on
+   any screen instead of bunching at the top of a tall one. */
+.map {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 6.5rem - 2rem);
+}
+
+.map > .groups {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  flex: var(--grow) 0 auto;
+}
+
+.nodes {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.nodeItem { flex: 1 0 auto; }
+.group:last-child .nodeItem:last-child { flex-grow: 0; }
+
+.hub {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.76rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+
+.hubDot {
+  position: relative;
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--fg);
+}
+
+/* A slow ring off the hub, the one thing moving while nothing else is. */
+.hubDot::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 50%;
+  border: 1px solid var(--fg-muted);
+  animation: ring 3.2s var(--ease-smooth) infinite;
+}
+
+@keyframes ring {
+  0%   { transform: scale(1); opacity: 0.8; }
+  70%  { transform: scale(4); opacity: 0; }
+  100% { transform: scale(4); opacity: 0; }
+}
+
+.groups,
+.nodes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* The rail starts under the hub dot's centre. */
+.groups { margin-left: 6px; }
+
+/* ---------- Connectors ----------
+   Every row draws two hairlines on its left edge:
+   ::before, an elbow from the top of the row round into its label;
+   ::after, the rail carrying on past it to the rows below (not on the
+   last row). Lighting the path means colouring the rails of the rows
+   it passes (.passed) and the elbow of the row it turns into
+   (.onPath). */
+.group,
+.nodeItem {
+  position: relative;
+}
+
+.group::before,
+.group::after,
+.nodeItem::before,
+.nodeItem::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  border: 0 solid var(--line);
+  transform-origin: top;
+  transition: border-color 450ms ease;
+  animation: draw 700ms var(--ease-smooth) both;
+  animation-delay: calc(var(--i) * 90ms + 100ms);
+}
+
+.group::before,
+.nodeItem::before {
+  border-left-width: var(--stroke);
+  border-bottom-width: var(--stroke);
+  border-bottom-left-radius: 14px;
+}
+
+.group::after,
+.nodeItem::after {
+  bottom: 0;
+  border-left-width: var(--stroke);
+}
+
+.group:last-child::after,
+.nodeItem:last-child::after { display: none; }
+
+@keyframes draw {
+  from { transform: scaleY(0); opacity: 0; }
+  to   { transform: scaleY(1); opacity: 1; }
+}
+
+/* The light travels: branch first, then down the nodes one by one. */
+.group.passed::after,
+.group.onPath::before { border-color: var(--fg); }
+
+.nodeItem.passed::after,
+.nodeItem.onPath::before {
+  border-color: var(--fg);
+  transition-delay: calc(var(--n) * 80ms + 180ms);
+}
+
+/* ---------- Branches ---------- */
+.group {
+  padding: var(--group-pad) 0 0 2.5rem;
+}
+
+.group::before {
+  width: 1.95rem;
+  height: var(--group-mid);
+}
+
+.groupLabel {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: calc(var(--group-lh) * 0.8);
+  line-height: var(--group-lh);
+  color: var(--fg-soft);
+  /* The display face ships one weight; thicken it the way the home
+     hero does. */
+  -webkit-text-stroke: 0.7px currentColor;
+  transition: color 400ms ease;
+  animation: rise 600ms var(--ease-smooth) both;
+  animation-delay: calc(var(--i) * 90ms + 200ms);
+}
+
+.onPath > .groupLabel { color: var(--fg-display); }
+
+.count {
+  margin-left: 0.35em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  color: var(--fg-muted);
+  vertical-align: super;
+  -webkit-text-stroke: 0;
+}
+
+/* ---------- Nodes ---------- */
+.nodes {
+  margin: 0.4rem 0 0.2rem 0.5rem;
+}
+
+.nodeItem {
+  padding: var(--node-pad) 0 0 2.2rem;
+}
+
+.nodeItem::before {
+  width: calc(2.2rem - 5px);
+  height: var(--node-mid);
+}
+
+.node {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 0 0 0.15rem;
+  animation: rise 600ms var(--ease-smooth) both;
+  animation-delay: calc(var(--i) * 90ms + 250ms);
+}
+
+.node:hover { opacity: 1; }
+
+.node:focus-visible {
+  outline: 1px solid var(--fg);
+  outline-offset: 4px;
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.dot {
+  position: relative;
+  flex: none;
+  width: 12px;
+  height: 12px;
+  margin-top: calc(var(--node-lh) / 2 - 6px);
+  margin-left: -5px;
+  border-radius: 50%;
+  border: var(--stroke) solid var(--fg-muted);
+  background: var(--bg);
+  transition: background 250ms ease, border-color 250ms ease, transform 300ms var(--ease-pop);
+}
+
+.nodeText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+  transition: transform 350ms var(--ease-smooth);
+}
+
+.label {
+  font-family: var(--font-display);
+  font-size: calc(var(--node-lh) * 0.78);
+  line-height: var(--node-lh);
+  color: var(--fg-soft);
+  -webkit-text-stroke: 0.45px currentColor;
+  transition: color 250ms ease;
+}
+
+.meta {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: clamp(0.6rem, 0.85vw, 0.76rem);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+
+/* Hover only where there is a real pointer: a phone keeps :hover on
+   whatever was last tapped, which would fight the selected state. */
+@media (hover: hover) {
+  .node:hover .dot { border-color: var(--fg); transform: scale(1.25); }
+  .node:hover .label { color: var(--fg-display); }
+  .node:hover .nodeText { transform: translateX(3px); }
+}
+
+/* The picked node: dot filled and ringing, label lit. */
+.selected .dot {
+  background: var(--fg);
+  border-color: var(--fg);
+  transform: scale(1.35);
+}
+
+.selected .dot::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 50%;
+  border: var(--stroke) solid var(--fg-muted);
+  animation: ring 2.4s var(--ease-smooth) infinite;
+}
+
+.selected .label { color: var(--fg-display); }
+
+/* The wire from the picked node across the gutter to the details. It
+   draws once the path down to the node has lit. */
+.wire {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 1.5rem;
+  height: var(--stroke);
+  margin: calc(var(--node-lh) / 2) calc(-1 * var(--split-gap) + 0.6rem) 0 0.6rem;
+  background: var(--fg);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 300ms var(--ease-smooth);
+}
+
+.wire::after {
+  content: '';
+  position: absolute;
+  right: -3px;
+  top: -3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--fg);
+}
+
+.selected .wire {
+  transform: scaleX(1);
+  transition: transform 550ms var(--ease-smooth) 380ms;
+}
+
+/* ---------- Details ---------- */
+.pane {
+  min-width: 0;
+  scroll-margin-top: 6rem;
+}
+
+.paneBar {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.crumb,
+.counter {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+
+.counter { color: var(--fg-faint); white-space: nowrap; }
+
+/* A swap slides the new entry in from the side it is coming from:
+   from the right going forward, from the left going back. */
+.detail[data-dir='next']:not([hidden]) { animation: inNext 600ms var(--ease-smooth) both; }
+.detail[data-dir='prev']:not([hidden]) { animation: inPrev 600ms var(--ease-smooth) both; }
+
+@keyframes inNext {
+  from { opacity: 0; transform: translateX(28px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes inPrev {
+  from { opacity: 0; transform: translateX(-28px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ---------- Previous / next ---------- */
+.stepper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line);
+}
+
+.stepBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  padding: 0.25rem 0;
+  border: none;
+  background: none;
+  color: var(--fg);
+  text-align: left;
+  cursor: pointer;
+}
+
+.stepNext {
+  align-items: flex-end;
+  text-align: right;
+}
+
+.stepBtn:focus-visible {
+  outline: 1px solid var(--fg);
+  outline-offset: 4px;
+}
+
+.stepHint {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+
+.stepTitle {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  color: var(--fg-soft);
+  transition: color 250ms ease, transform 350ms var(--ease-smooth);
+}
+
+.stepBtn:hover .stepTitle { color: var(--fg-display); transform: translateX(-4px); }
+.stepNext:hover .stepTitle { transform: translateX(4px); }
+
+/* ---------- Narrow: the map becomes a strip ----------
+   A row of chips pinned under the nav, scrolling sideways, with each
+   branch name as a small label in front of its chips. Same nodes,
+   same selection; the tree's lines and the wire have nowhere to go,
+   so they are dropped. */
+@media (max-width: 1040px) {
+  .split {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.25rem;
+    padding-top: 0;
+    border-top: none;
+  }
+
+  .aside {
+    top: 4.1rem;
+    z-index: 20;
+    margin: 0 calc(-1 * var(--gutter));
+    padding: 0.75rem 0;
+    background: var(--bg);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .hub { display: none; }
+
+  /* No stretching in the strip, and every level runs sideways. */
+  .map { display: block; min-height: 0; }
+  .map > .groups,
+  .group,
+  .nodes { flex: none; flex-direction: row; }
+  .nodeItem,
+  .group:last-child .nodeItem:last-child { flex: none; }
+
+  .groups {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin: 0;
+    padding: 0 var(--gutter);
+    overflow-x: auto;
+    scrollbar-width: none;
+    /* Fade out at the right edge so chips running off the screen read
+       as "there is more this way" rather than as cut off. */
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 3rem), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 3rem), transparent);
+    padding-right: 3rem;
+  }
+
+  .groups::-webkit-scrollbar { display: none; }
+
+  .group {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0;
+  }
+
+  .group::before,
+  .group::after,
+  .nodeItem::before,
+  .nodeItem::after { display: none; }
+
+  .groupLabel {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.58rem;
+    line-height: 1;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    white-space: nowrap;
+  }
+
+  .count { display: none; }
+
+  .nodes {
+    display: flex;
+    gap: 0.4rem;
+    margin: 0;
+  }
+
+  .nodeItem { padding: 0; }
+
+  .node {
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.35rem 0.85rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    white-space: nowrap;
+    transition: background 300ms ease, border-color 300ms ease;
+  }
+
+  .dot { width: 5px; height: 5px; margin: 0; }
+  .label { font-size: 0.92rem; line-height: 1.2; }
+  .meta,
+  .wire { display: none; }
+
+  .node:hover .nodeText { transform: none; }
+
+  .node.selected {
+    background: var(--fg);
+    border-color: var(--fg);
+  }
+
+  .node.selected .label { color: var(--bg); }
+  .node.selected .dot { background: var(--bg); border-color: var(--bg); transform: none; }
+  .selected .dot::after { display: none; }
+
+  .pane { scroll-margin-top: 8.5rem; }
+}
+
+@media (max-width: 560px) {
+  .stepTitle { font-size: 1.05rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .group::before,
+  .group::after,
+  .nodeItem::before,
+  .nodeItem::after,
+  .groupLabel,
+  .node,
+  .detail:not([hidden]) { animation: none; }
+  .hubDot::after,
+  .selected .dot::after { animation: none; opacity: 0; }
+  .wire,
+  .selected .wire { transition: none; }
+}

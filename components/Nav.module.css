@@ -88,7 +88,18 @@
 
 .panelList a.panelActive { color: var(--fg-display); }
 
-@media (max-width: 720px) {
+/* Eight links at full spacing need about 1,150px. Tighten them on
+   laptop-sized screens rather than letting the last one fall off the
+   edge, and hand over to the Menu toggle once even that runs out. */
+@media (max-width: 1320px) {
+  .list {
+    gap: 1.25rem;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+  }
+}
+
+@media (max-width: 1040px) {
   .list   { display: none; }
   .toggle { display: block; }
 }

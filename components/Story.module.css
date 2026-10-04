@@ -1,0 +1,311 @@
+/* Structured story block. Monochrome like everything else — emphasis is
+   value and scale, motion is the shared --ease-smooth curve. */
+
+.story {
+  display: flex;
+  flex-direction: column;
+  gap: 2.75rem;
+  margin: 0.5rem 0 2rem;
+}
+
+/* ---------- Lede ---------- */
+.lede {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  line-height: 1.55;
+  color: var(--fg);
+  margin: 0;
+  max-width: 46ch;
+}
+
+/* ---------- Awards ---------- */
+.awards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+}
+.award {
+  display: grid;
+  grid-template-columns: 1.6rem 6.5rem 1fr;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--line);
+  cursor: default;
+  transition: padding 0.45s var(--ease-smooth);
+}
+.award:hover { padding-left: 0.6rem; }
+
+.trophy {
+  position: relative;
+  display: inline-block;
+  font-size: 1.05rem;
+  line-height: 1;
+  transition: transform 0.45s var(--ease-pop);
+}
+.award:hover .trophy { transform: rotate(-10deg) scale(1.15); }
+
+/* Confetti. Monochrome on purpose: the trophy is the only colour in the
+   row, and the pieces read as light catching paper rather than a party
+   popper. Three shapes so the burst doesn't look stamped out. */
+.confetti {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  pointer-events: none;
+}
+.confetti i {
+  position: absolute;
+  left: 0;
+  top: 0;
+  background: var(--fg);
+  opacity: 0;
+  animation: confetti 1.15s cubic-bezier(0.15, 0.7, 0.3, 1) both;
+}
+.piece0 { width: 5px; height: 2px; }
+.piece1 { width: 3px; height: 3px; border-radius: 50%; background: var(--fg-soft) !important; }
+.piece2 { width: 2px; height: 6px; background: var(--fg-muted) !important; }
+
+@keyframes confetti {
+  0%   { opacity: 0; transform: translate(0, 0) rotate(0); }
+  12%  { opacity: 1; }
+  70%  { opacity: 0.9; }
+  /* Overshoots up and out, then drifts down a touch as it fades — the
+     small fall is what makes it read as paper, not sparks. */
+  100% { opacity: 0; transform: translate(var(--x), calc(var(--y) + 22px)) rotate(var(--r)); }
+}
+.awardBy {
+  font-size: 0.7rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+.awardTitle { color: var(--fg); }
+
+/* ---------- Stepped diagram ---------- */
+.ends {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  margin-bottom: 1.1rem;
+}
+
+.track {
+  position: relative;
+}
+/* The hairline, and the brighter line that grows along it as the
+   handshake advances. Both sit at the dots' centre line. */
+.track::before,
+.fill {
+  content: '';
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  top: 6px;
+  height: 1px;
+  background: var(--line);
+}
+.fill {
+  background: var(--fg);
+  transform-origin: left;
+  transform: scaleX(var(--p, 0));
+  transition: transform 0.8s var(--ease-smooth);
+}
+
+.nodes {
+  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: space-between;
+}
+.nodes li:last-child .node { align-items: flex-end; }
+.nodes li:not(:first-child):not(:last-child) .node { align-items: center; }
+
+.node {
+  all: unset;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.7rem;
+}
+.node:focus-visible .nodeLabel { outline: 1px solid var(--fg-muted); outline-offset: 4px; }
+
+.dot {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 1px solid var(--fg-muted);
+  background: var(--bg);
+  transition: background-color 0.4s var(--ease-smooth),
+              border-color 0.4s var(--ease-smooth),
+              transform 0.4s var(--ease-pop);
+}
+.node:hover .dot { transform: scale(1.35); }
+.nodeOn .dot { background: var(--fg); border-color: var(--fg); }
+
+.nodeLabel {
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  transition: color 0.3s ease;
+}
+.nodeOn .nodeLabel,
+.node:hover .nodeLabel { color: var(--fg); }
+
+.stepDetail {
+  margin: 1.5rem 0 0;
+  min-height: 3.2em;
+  color: var(--fg-soft);
+  animation: rise 0.55s var(--ease-smooth) both;
+}
+.stepNo {
+  display: block;
+  font-size: 0.68rem;
+  letter-spacing: 0.25em;
+  color: var(--fg-faint);
+  margin-bottom: 0.35rem;
+}
+
+/* ---------- Count-up figures ---------- */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 1.25rem 1rem 1.25rem 0;
+  transition: transform 0.45s var(--ease-smooth);
+}
+.stat + .stat { padding-left: 1rem; border-left: 1px solid var(--line); }
+.stat:hover { transform: translateY(-3px); }
+.statValue {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 3.6vw, 2.8rem);
+  line-height: 1;
+  color: var(--fg-display);
+  font-variant-numeric: tabular-nums;
+}
+.statLabel {
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--fg-muted);
+}
+
+/* ---------- Tabs ---------- */
+.tabList {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--n), 1fr);
+  border-bottom: 1px solid var(--line);
+}
+.tab {
+  all: unset;
+  cursor: pointer;
+  padding: 0 0 0.8rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  transition: color 0.3s ease;
+}
+.tab:hover,
+.tabOn { color: var(--fg); }
+.tab:focus-visible { outline: 1px solid var(--fg-muted); outline-offset: 4px; }
+
+/* One bar that slides under whichever tab is active. */
+.tabBar {
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  height: 1px;
+  width: calc(100% / var(--n));
+  background: var(--fg);
+  transform: translateX(calc(100% * var(--i)));
+  transition: transform 0.55s var(--ease-smooth);
+}
+
+.tabPanel {
+  list-style: none;
+  margin: 1.25rem 0 0;
+  padding: 0;
+}
+.tabPanel li {
+  position: relative;
+  padding: 0.45rem 0 0.45rem 1.95rem;
+  color: var(--fg-soft);
+  animation: rise 0.5s var(--ease-smooth) both;
+}
+/* The agentHire face as the bullet. On hover the row brightens, the
+   face turns toward the text, blinks, and the brows lift. */
+.face {
+  position: absolute;
+  left: 0;
+  top: 0.55rem;
+  width: 1.1rem;
+  height: 1.1rem;
+  color: var(--fg-muted);
+  overflow: visible;
+  transition: color 0.3s ease, transform 0.45s var(--ease-pop);
+}
+.faceEyes,
+.faceBrows {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 0.35s var(--ease-pop);
+}
+.tabPanel li:hover .face {
+  color: var(--fg);
+  transform: rotate(-12deg) scale(1.15);
+}
+.tabPanel li:hover .faceBrows { transform: translateY(-6%); }
+.tabPanel li:hover .faceEyes { animation: blink 0.5s ease 0.1s; }
+
+@keyframes blink {
+  0%, 100% { transform: scaleY(1); }
+  45%, 55% { transform: scaleY(0.1); }
+}
+
+.tabPanel li { transition: color 0.3s ease; }
+.tabPanel li:hover { color: var(--fg); }
+
+/* ---------- Footnote ---------- */
+.footnote {
+  margin: 0;
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--fg-muted);
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (max-width: 560px) {
+  .stats { grid-template-columns: 1fr; }
+  .stat + .stat { padding-left: 0; border-left: none; border-top: 1px solid var(--line); }
+  .award { grid-template-columns: 1.6rem 1fr; column-gap: 0.75rem; row-gap: 0.2rem; }
+  .award .awardTitle { grid-column: 2; }
+  .nodeLabel { font-size: 0.62rem; letter-spacing: 0.12em; }
+  /* Three equal tab columns are ~90px each on a 320px phone; at the
+     desktop tracking "RECRUITERS" runs straight into "DATA". */
+  .tab { font-size: 0.62rem; letter-spacing: 0.08em; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fill, .tabBar, .dot, .stat, .award, .trophy { transition: none; }
+  .stepDetail, .tabPanel li { animation: none; }
+  .face, .faceEyes, .faceBrows { transition: none; animation: none !important; }
+}

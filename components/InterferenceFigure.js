@@ -24,7 +24,7 @@ export default function InterferenceFigure() {
       </div>
 
       <figcaption className={styles.caption}>
-        Travelling ionospheric disturbances — four plane waves summed. Not a
+        Travelling ionospheric disturbances: four plane waves summed. Not a
         measurement: the expression the project models, drawn live.
       </figcaption>
     </figure>

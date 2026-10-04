@@ -4,7 +4,11 @@
  * rather than pulled in, because Swiper and Embla both weigh more than
  * this whole component and I only needed two behaviours from either.
  *
- * @param images  Image URLs, e.g. ['/images/home/1.jpeg'].
+ * @param images  Image URLs, e.g. ['/images/home/1.jpeg']. An entry can
+ *                also be { youtube: '<video id>', title } to show a video
+ *                in the same frame, at the same size, as the photos,
+ *                or { preview: '<url>', title } to show the top of a
+ *                live site, running, scaled down into the frame.
  * @param alt     Alt-text prefix; each slide gets "<alt> <n>".
  * @param variant 'portrait' is a 4:5 cover frame and suits photos.
  *                'wide' is 16:10 and contains rather than crops —
@@ -13,6 +17,73 @@
  */
 import { useState, useEffect, useCallback, useRef } from 'react';
 import styles from './Carousel.module.css';
+
+// The size a live preview is rendered at before being scaled to fit.
+// A desktop viewport, so the site lays out the way it was designed to
+// be seen; 16:10, so it fills the wide frame with nothing cropped.
+const PREVIEW_W = 1280;
+const PREVIEW_H = 800;
+
+// A live site, running in an iframe, shrunk to the frame. Not
+// interactive: a full site at a third of its size is not usable, and
+// an iframe that eats wheel events would trap the page's scroll. The
+// whole frame is a link to the real thing instead.
+function LivePreview({ url, title, className }) {
+  const boxRef = useRef(null);
+  const [scale, setScale] = useState(0);
+
+  useEffect(() => {
+    const el = boxRef.current;
+    if (!el) return;
+    const fit = () => setScale(el.clientWidth / PREVIEW_W);
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  return (
+    <a
+      ref={boxRef}
+      href={url}
+      target="_blank"
+      rel="noreferrer"
+      className={`${styles.preview} ${className}`}
+      aria-label={`${title}: open the live site`}
+      data-umami-event="live-preview"
+      data-umami-event-url={url}
+    >
+      <iframe
+        src={url}
+        title={title}
+        width={PREVIEW_W}
+        height={PREVIEW_H}
+        className={styles.previewFrame}
+        style={{ transform: `scale(${scale})`, opacity: scale ? 1 : 0 }}
+        loading="lazy"
+        tabIndex={-1}
+        aria-hidden="true"
+        scrolling="no"
+      />
+    </a>
+  );
+}
+
+// A long hairline arrow pointing right; the previous button mirrors it.
+function Arrow() {
+  return (
+    <svg viewBox="0 0 34 12" width="34" height="12" aria-hidden="true" focusable="false">
+      <path
+        d="M0 6 H32 M27 1 L32 6 L27 11"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
 export default function Carousel({ images = [], alt = 'photo', variant = 'portrait' }) {
   const [i, setI] = useState(0);
@@ -115,7 +186,7 @@ export default function Carousel({ images = [], alt = 'photo', variant = 'portra
         tabIndex={total > 1 ? 0 : undefined}
         role={total > 1 ? 'group' : undefined}
         aria-label={
-          total > 1 ? `${alt} — image gallery, use arrow keys or swipe` : undefined
+          total > 1 ? `${alt}: image gallery, use arrow keys or swipe` : undefined
         }
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
@@ -123,44 +194,74 @@ export default function Carousel({ images = [], alt = 'photo', variant = 'portra
         onPointerCancel={endDrag}
         onPointerLeave={endDrag}
       >
-        <img
-          key={images[safeIndex]}
-          src={images[safeIndex]}
-          alt={`${alt} ${safeIndex + 1}`}
-          className={`${styles.img} ${wide ? styles.imgWide : 'bw'}`}
-          loading="lazy"
-        />
-
-        {total > 1 && (
-          <>
-            <button
-              className={`${styles.btn} ${styles.left}`}
-              onClick={prev}
-              aria-label="Previous image"
-            >‹</button>
-
-            <button
-              className={`${styles.btn} ${styles.right}`}
-              onClick={next}
-              aria-label="Next image"
-            >›</button>
-          </>
+        {images[safeIndex]?.preview ? (
+          <LivePreview
+            key={images[safeIndex].preview}
+            url={images[safeIndex].preview}
+            title={images[safeIndex].title || alt}
+            className={wide ? styles.imgWide : 'bw'}
+          />
+        ) : images[safeIndex]?.youtube ? (
+          // youtube-nocookie: no YouTube cookies until the visitor
+          // presses play, which keeps the site cookie-free like Umami.
+          <iframe
+            key={images[safeIndex].youtube}
+            src={`https://www.youtube-nocookie.com/embed/${images[safeIndex].youtube}?rel=0`}
+            title={images[safeIndex].title || `${alt} video`}
+            className={`${styles.video} ${wide ? styles.imgWide : 'bw'}`}
+            loading="lazy"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerPolicy="strict-origin-when-cross-origin"
+            allowFullScreen
+          />
+        ) : (
+          <img
+            key={images[safeIndex]}
+            src={images[safeIndex]}
+            alt={`${alt} ${safeIndex + 1}`}
+            className={`${styles.img} ${wide ? styles.imgWide : 'bw'}`}
+            loading="lazy"
+          />
         )}
+
       </div>
 
       {total > 1 && (
         <>
-          <div className={styles.dots} role="tablist">
-            {images.map((_, idx) => (
-              <button
-                key={idx}
-                className={`${styles.dot} ${idx === safeIndex ? styles.activeDot : ''}`}
-                onClick={() => setI(idx)}
-                aria-label={`Go to image ${idx + 1}`}
-                aria-selected={idx === safeIndex}
-                role="tab"
-              />
-            ))}
+          {/* Arrows live under the media, not on it: bare hairline
+              arrows either side of the dots, so nothing sits on top of
+              a photo or a video's own controls. */}
+          <div className={styles.controls}>
+            <button
+              type="button"
+              className={`${styles.arrow} ${styles.arrowPrev}`}
+              onClick={prev}
+              aria-label="Previous image"
+            >
+              <Arrow />
+            </button>
+
+            <div className={styles.dots} role="tablist">
+              {images.map((_, idx) => (
+                <button
+                  key={idx}
+                  className={`${styles.dot} ${idx === safeIndex ? styles.activeDot : ''}`}
+                  onClick={() => setI(idx)}
+                  aria-label={`Go to image ${idx + 1}`}
+                  aria-selected={idx === safeIndex}
+                  role="tab"
+                />
+              ))}
+            </div>
+
+            <button
+              type="button"
+              className={`${styles.arrow} ${styles.arrowNext}`}
+              onClick={next}
+              aria-label="Next image"
+            >
+              <Arrow />
+            </button>
           </div>
 
           <div className={styles.counter}>

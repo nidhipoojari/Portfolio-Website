@@ -24,9 +24,13 @@ const forum = Forum({
 // hardcode the role, which meant changing it in one place left the tab
 // and the search result showing the old one.
 export const metadata = {
-  metadataBase: new URL('https://nidhipoojari.vercel.app'),
-  title: `${site.name} — ${site.role}`,
-  description: `${site.role}. Production web apps with an AI layer — React, Next.js, Node, FastAPI, LLM agents and RAG.`,
+  metadataBase: new URL('https://nidhipoojari.com'),
+  title: `${site.name} - ${site.role}`,
+  description: `${site.role}. Production web apps with an AI layer: React, Next.js, Node, FastAPI, LLM agents and RAG.`,
+  // The image itself comes from app/opengraph-image.js; these just make
+  // the share card large instead of a thumbnail.
+  openGraph: { type: 'website', siteName: site.name },
+  twitter: { card: 'summary_large_image' },
 };
 
 /**
@@ -57,7 +61,10 @@ document.documentElement.classList.add('js');
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={forum.variable}>
+    // suppressHydrationWarning: JS_FLAG adds the `js` class (and
+    // data-theme) before React hydrates, so <html> never matches the
+    // server render. Expected, and it only silences this one element.
+    <html lang="en" className={forum.variable} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: JS_FLAG }} />
       </head>

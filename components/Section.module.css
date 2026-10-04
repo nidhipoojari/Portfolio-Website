@@ -5,6 +5,9 @@
   align-items: start;
   padding: 4rem 0;
   border-top: 1px solid var(--line);
+  /* Sections are link targets (/projects#nestiq, from the ask box), and
+     the nav is sticky — without this the title lands under it. */
+  scroll-margin-top: 5rem;
 }
 .section:first-of-type { border-top: none; }
 
@@ -80,6 +83,18 @@
   position: sticky;
   top: 7rem;
 }
+
+/* One column, media first: for when the section sits in a container
+   too narrow for copy and media side by side. Photos are capped so a
+   4:5 portrait frame doesn't run a thousand pixels tall. */
+.stacked {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  padding: 1.5rem 0 2rem;
+  border-top: none;
+}
+.stacked .media { order: -1; width: 100%; max-width: 420px; }
+.stacked .mediaSticky { position: static; max-width: 720px; }
 
 @media (max-width: 900px) {
   .section { grid-template-columns: 1fr; gap: 2rem; padding: 3rem 0; }

@@ -100,6 +100,12 @@ p { margin: 0 0 1em 0; }
   letter-spacing: -0.01em;
 }
 
+/* Below ~415px the 3rem floor stops being a floor and starts being an
+   overflow: "Extracurricular." is wider than a 320px phone at 3rem. */
+@media (max-width: 414px) {
+  .page-title { font-size: 13vw; }
+}
+
 .page-title .accent {
   font-style: italic;
   color: var(--fg-muted);

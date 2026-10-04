@@ -1,88 +1,42 @@
-// Projects index — content in lib/data.js, as always.
+// Projects as a mind map: every project on a branch on the left, the
+// picked one on the right (components/MindMap). Content in lib/data.js,
+// as always.
 //
-// A project can carry links.live, links.github, links.paper, some
-// combination, or nothing at all. Only what exists gets rendered,
-// which is why the published-paper project shows a single link and
-// NestIQ shows two.
+// Published projects (publicationIds) live on the Publications page
+// instead, so they're left off the map.
 
-import Section from '@/components/Section';
 import PageTitle from '@/components/PageTitle';
-import Pipeline from '@/components/Pipeline';
-import InterferenceFigure from '@/components/InterferenceFigure';
-import { projects } from '@/lib/data';
-import styles from './projects.module.css';
+import ProjectSection from '@/components/ProjectSection';
+import MindMap from '@/components/MindMap';
+import { projects, projectGroups, publicationIds } from '@/lib/data';
 
 export const metadata = {
-  title: 'Projects — Nidhi Poojari',
+  title: 'Projects - Nidhi Poojari',
   description:
-    'Selected work — AI platforms, agentic LLM systems, and full-stack products.',
+    'Selected work: hackathon builds, AI platforms, agentic LLM systems, and full-stack products.',
 };
 
 export default function ProjectsPage() {
+  const unpublished = projects.filter((p) => !publicationIds.includes(p.id));
+
+  const details = Object.fromEntries(
+    unpublished.map((p) => [
+      p.id,
+      <ProjectSection key={p.id} p={p} stacked anchored={false} />,
+    ])
+  );
+
   return (
     <div className="page">
       <PageTitle text="Projects" />
 
-      {projects.map((p, idx) => (
-        <Section
-          key={p.id}
-          index={idx + 1}
-          title={p.title}
-          period={p.period}
-          description={p.description}
-          images={p.images}
-          mediaVariant="wide"
-        >
-          <p className={styles.stack}>{p.stack.join(' · ')}</p>
-
-          <div className={styles.links}>
-            {p.links?.live && (
-              <a
-                href={p.links.live}
-                target="_blank"
-                rel="noreferrer"
-                className={styles.link}
-                data-umami-event="project-link"
-                data-umami-event-project={p.id}
-                data-umami-event-kind="live"
-              >
-                Live ↗
-              </a>
-            )}
-            {p.links?.github && (
-              <a
-                href={p.links.github}
-                target="_blank"
-                rel="noreferrer"
-                className={styles.link}
-                data-umami-event="project-link"
-                data-umami-event-project={p.id}
-                data-umami-event-kind="github"
-              >
-                GitHub ↗
-              </a>
-            )}
-            {p.links?.paper && (
-              <a
-                href={p.links.paper}
-                target="_blank"
-                rel="noreferrer"
-                className={styles.link}
-                data-umami-event="project-link"
-                data-umami-event-project={p.id}
-                data-umami-event-kind="paper"
-              >
-                Paper ↗
-              </a>
-            )}
-          </div>
-
-          {/* Two projects carry a bespoke piece each, both showing what
-              their prose otherwise only claims. */}
-          {p.id === 'nestiq' && <Pipeline />}
-          {p.id === 'ionosphericTec' && <InterferenceFigure />}
-        </Section>
-      ))}
+      <MindMap
+        groups={projectGroups}
+        items={unpublished}
+        details={details}
+        hubLabel="My work"
+        name="projects"
+      />
     </div>
   );
 }

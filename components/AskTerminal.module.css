@@ -143,6 +143,32 @@
   white-space: pre-wrap;
 }
 
+/* Jobs and projects the answer drew on. */
+.refs {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.ref {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--fg-muted);
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  text-underline-offset: 0.25em;
+  transition: color 0.25s ease, text-decoration-color 0.25s ease;
+}
+
+.ref:hover {
+  color: var(--fg);
+  text-decoration-color: var(--fg-muted);
+}
+
 /* Blinking block cursor while the answer streams in. */
 .cursor {
   display: inline-block;

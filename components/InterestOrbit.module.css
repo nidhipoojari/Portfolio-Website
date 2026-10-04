@@ -1,0 +1,126 @@
+/* Interests orbit: ring + selected copy on the left, photos on the right.
+   Same two-column proportions as Section.module.css. */
+
+.wrap {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 4rem;
+  align-items: start;
+  padding: 2rem 0 4rem;
+}
+
+.left { min-width: 0; }
+
+.orbit {
+  position: relative;
+  width: min(100%, 340px);
+  aspect-ratio: 1;
+  margin: 0 auto 2.5rem 0;
+  --rot: 0deg;
+}
+
+/* Rotates as one piece — the marker and the points ride along. */
+.ring {
+  position: absolute;
+  inset: 0;
+  transform: rotate(var(--rot));
+}
+
+.circle {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.circle circle {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 0.35;
+}
+
+.marker {
+  position: absolute;
+  left: var(--mx, 50%);
+  top: var(--my, 8%);
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--fg-muted);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.node {
+  position: absolute;
+  /* A generous invisible hit area around a small dot. */
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  /* Counter-rotated so the words stay level while the ring turns. */
+  transform: translate(-50%, -50%) rotate(calc(var(--rot) * -1));
+  cursor: pointer;
+  color: var(--fg-muted);
+}
+.node:focus-visible { outline: none; }
+.node:focus-visible .dot { box-shadow: 0 0 0 4px var(--line); }
+
+.dot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--fg-faint);
+  transform: translate(-50%, -50%);
+  transition: background-color 0.4s ease, transform 0.5s var(--ease-pop);
+}
+.on .dot {
+  background: var(--fg);
+  transform: translate(-50%, -50%) scale(1.35);
+}
+
+.label {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  white-space: nowrap;
+  font-size: 0.78rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  transform: translate(-50%, 16px);
+  transition: color 0.4s ease;
+}
+.node:hover .label,
+.on .label { color: var(--fg); }
+
+.num {
+  margin-right: 0.5em;
+  font-size: 0.85em;
+  color: var(--fg-faint);
+}
+
+.title {
+  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+  line-height: 1.1;
+  margin-bottom: 1rem;
+}
+
+.body {
+  margin: 0 0 0.9em;
+  color: var(--fg-soft);
+  max-width: 52ch;
+}
+
+.media { min-width: 0; }
+
+@media (max-width: 860px) {
+  .wrap {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+  .orbit { margin: 1rem auto 2rem; width: min(78vw, 300px); }
+}

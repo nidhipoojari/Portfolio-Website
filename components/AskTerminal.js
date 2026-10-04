@@ -4,10 +4,17 @@
 //
 // One exchange at a time on purpose — no history, no avatars, no
 // typing bubbles. It should answer a recruiter's question and get out
-// of the way, not pretend to be a chatbot.
+// of the way, not pretend to be a chatbot. What it does leave behind is
+// a way onward: links to the jobs and projects the answer drew on, and
+// three follow-up questions to click instead of type.
+//
+// Every question is sent to Umami as the `question` property of
+// ask-submitted. That is the point of logging it — the event breakdown
+// in the dashboard is the site's FAQ, written by the people asking.
 
 import { useState, useRef, useEffect } from 'react';
 import { track } from '@/lib/analytics';
+import TransitionLink from './TransitionLink';
 import styles from './AskTerminal.module.css';
 
 const SUGGESTIONS = [
@@ -16,6 +23,10 @@ const SUGGESTIONS = [
   'What is her strongest project?',
   'Has she worked with Kubernetes?',
 ];
+
+// Must match META_SEPARATOR in app/api/ask/route.js. Everything after it
+// in the response is one JSON frame: { refs, followups }.
+const META_SEPARATOR = '\u001e';
 
 export default function AskTerminal() {
   const [question, setQuestion] = useState('');
@@ -26,6 +37,8 @@ export default function AskTerminal() {
   const [segments, setSegments] = useState([]);
   const [asked, setAsked] = useState('');
   const [busy, setBusy] = useState(false);
+  const [refs, setRefs] = useState([]);
+  const [followups, setFollowups] = useState([]);
   const inputRef = useRef(null);
   const abortRef = useRef(null);
 
@@ -50,9 +63,13 @@ export default function AskTerminal() {
     setBusy(true);
     setAsked(q);
     setSegments([]);
+    setRefs([]);
+    setFollowups([]);
     setQuestion('');
 
-    track('ask-submitted', { source });
+    // Umami caps string properties at 500 characters; the input caps
+    // at 400, so the question always fits whole.
+    track('ask-submitted', { source, question: q });
 
     // Time to first byte is the number that decides whether this feels
     // broken, and it is invisible from the server side — the model is
@@ -78,6 +95,9 @@ export default function AskTerminal() {
       } else {
         const reader = res.body.getReader();
         const decoder = new TextDecoder();
+        // Set once the separator arrives; from then on the stream is
+        // metadata, buffered whole and parsed at the end.
+        let meta = null;
 
         // Append each chunk as it lands. No buffering, no typewriter
         // timer faking it — the text appears at whatever speed the model
@@ -87,11 +107,33 @@ export default function AskTerminal() {
           const { value, done } = await reader.read();
           if (done) break;
 
-          const text = decoder.decode(value, { stream: true });
+          let text = decoder.decode(value, { stream: true });
           if (!text) continue;
+
+          if (meta !== null) {
+            meta += text;
+            continue;
+          }
+
+          const at = text.indexOf(META_SEPARATOR);
+          if (at !== -1) {
+            meta = text.slice(at + 1);
+            text = text.slice(0, at);
+            if (!text) continue;
+          }
 
           if (firstByteAt === null) firstByteAt = performance.now();
           setSegments((prev) => [...prev, text]);
+        }
+
+        if (meta) {
+          try {
+            const parsed = JSON.parse(meta);
+            setRefs(Array.isArray(parsed.refs) ? parsed.refs : []);
+            setFollowups(Array.isArray(parsed.followups) ? parsed.followups : []);
+          } catch {
+            // No links, default suggestions. The answer itself is fine.
+          }
         }
       }
 
@@ -197,7 +239,44 @@ export default function AskTerminal() {
             <p className={styles.srOnly} aria-live="polite">
               {busy ? '' : answer}
             </p>
+
+            {!busy && refs.length > 0 && (
+              <ul className={styles.refs} aria-label="Related work">
+                {refs.map((r) => (
+                  <li key={r.href}>
+                    <TransitionLink
+                      href={r.href}
+                      className={styles.ref}
+                      data-umami-event="ask-link"
+                      data-umami-event-href={r.href}
+                    >
+                      <span aria-hidden="true">&rarr; </span>
+                      {r.label}
+                    </TransitionLink>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
+        )}
+
+        {asked && !busy && (
+          <ul className={styles.suggestions} aria-label="Ask next">
+            {(followups.length
+              ? followups
+              : SUGGESTIONS.filter((s) => s !== asked).slice(0, 3)
+            ).map((s) => (
+              <li key={s}>
+                <button
+                  type="button"
+                  className={styles.chip}
+                  onClick={() => ask(s, followups.length ? 'followup' : 'suggestion')}
+                >
+                  {s}
+                </button>
+              </li>
+            ))}
+          </ul>
         )}
 
         <p className={styles.note}>
