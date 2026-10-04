@@ -135,37 +135,77 @@ Visitors can ask things like *"Has she worked with RAG?"* and get a short answer
 
 ## Project structure
 
-Every entry links to the file on GitHub.
+Folders end in `/`; every name is a link to that file or folder on GitHub.
 
-- **`app/`** pages and server code
-  - [`layout.js`](app/layout.js) root layout: nav, theme boot script, motion chrome, analytics
-  - [`page.js`](app/page.js) home: hero, skills marquee, about, ask box
-  - [`globals.css`](app/globals.css) design tokens, reset, shared classes · [`home.module.css`](app/home.module.css)
-  - [`opengraph-image.js`](app/opengraph-image.js) link-preview image · [`icon.svg`](app/icon.svg) favicon
-  - Pages, one folder per URL:
-    [`experience`](app/experience/page.js) ·
-    [`education`](app/education/page.js) ·
-    [`projects`](app/projects/page.js) ([styles](app/projects/projects.module.css)) ·
-    [`publications`](app/publications/page.js) ·
-    [`certifications`](app/certifications/page.js) ·
-    [`extracurricular`](app/extracurricular/page.js) ·
-    [`interests`](app/interests/page.js)
-  - **`api/`**
-    - [`ask/route.js`](app/api/ask/route.js) streaming AI endpoint
-    - [`health/route.js`](app/api/health/route.js) is the API key configured?
-- **`components/`** (each `.js` has a matching `.module.css` where it has styles)
-  - Layout: [`Section`](components/Section.js) · [`Carousel`](components/Carousel.js) · [`Nav`](components/Nav.js) · [`PageTitle`](components/PageTitle.js) · [`ThemeToggle`](components/ThemeToggle.js)
-  - Projects: [`MindMap`](components/MindMap.js) · [`ProjectSection`](components/ProjectSection.js) · [`Story`](components/Story.js) · [`Pipeline`](components/Pipeline.js) · [`InterferenceFigure`](components/InterferenceFigure.js) · [`InterferenceField`](components/InterferenceField.js)
-  - Other pages: [`RoleFilter`](components/RoleFilter.js) · [`Coursework`](components/Coursework.js) · [`CertList`](components/CertList.js) · [`InterestOrbit`](components/InterestOrbit.js)
-  - Motion: [`SplitReveal`](components/SplitReveal.js) · [`Reveal`](components/Reveal.js) · [`PageTransition`](components/PageTransition.js) · [`TransitionLink`](components/TransitionLink.js) · [`SmoothScroll`](components/SmoothScroll.js) · [`Marquee`](components/Marquee.js) · [`Cursor`](components/Cursor.js)
-  - AI and tracking: [`AskTerminal`](components/AskTerminal.js) · [`Analytics`](components/Analytics.js)
-- **`lib/`**
-  - [`data.js`](lib/data.js) every word on the site
-  - [`images.js`](lib/images.js) photo registry per section
-  - [`corpus.js`](lib/corpus.js) turns `data.js` into the AI's profile
-  - [`analytics.js`](lib/analytics.js) small wrapper around Umami
-- **`public/`** [`images/`](public/images) and [`icons/`](public/icons)
-- **Config:** [`package.json`](package.json) · [`next.config.mjs`](next.config.mjs) · [`jsconfig.json`](jsconfig.json) · [`.env.local.example`](.env.local.example) · [`scripts/copy-images.js`](scripts/copy-images.js)
+<pre>
+<b>Portfolio-Website/</b>
+├── <a href="app">app/</a>                                      # pages and server code (App Router)
+│   ├── <a href="app/layout.js">layout.js</a>                             # root layout: nav, theme script, analytics
+│   ├── <a href="app/page.js">page.js</a>                               # home: hero, skills, about, ask box
+│   ├── <a href="app/globals.css">globals.css</a>                           # design tokens, reset, shared classes
+│   ├── <a href="app/home.module.css">home.module.css</a>                       # home page styles
+│   ├── <a href="app/opengraph-image.js">opengraph-image.js</a>                    # link-preview image
+│   ├── <a href="app/icon.svg">icon.svg</a>                              # favicon
+│   ├── <a href="app/api">api/</a>                                  # server-only route handlers
+│   │   ├── <a href="app/api/ask">ask/</a>
+│   │   │   └── <a href="app/api/ask/route.js">route.js</a>                      # POST /api/ask, streaming AI endpoint
+│   │   └── <a href="app/api/health">health/</a>
+│   │       └── <a href="app/api/health/route.js">route.js</a>                      # GET /api/health, is the key set?
+│   ├── <a href="app/experience">experience/</a>
+│   │   └── <a href="app/experience/page.js">page.js</a>                           # /experience
+│   ├── <a href="app/education">education/</a>
+│   │   └── <a href="app/education/page.js">page.js</a>                           # /education
+│   ├── <a href="app/extracurricular">extracurricular/</a>
+│   │   └── <a href="app/extracurricular/page.js">page.js</a>                           # /extracurricular
+│   ├── <a href="app/projects">projects/</a>
+│   │   ├── <a href="app/projects/page.js">page.js</a>                           # /projects
+│   │   └── <a href="app/projects/projects.module.css">projects.module.css</a>               # projects page styles
+│   ├── <a href="app/publications">publications/</a>
+│   │   └── <a href="app/publications/page.js">page.js</a>                           # /publications
+│   ├── <a href="app/certifications">certifications/</a>
+│   │   └── <a href="app/certifications/page.js">page.js</a>                           # /certifications
+│   └── <a href="app/interests">interests/</a>
+│       └── <a href="app/interests/page.js">page.js</a>                           # /interests
+├── <a href="components">components/</a>                               # client components (+ .module.css where styled)
+│   ├── <a href="components/Analytics.js">Analytics.js</a>                          # Umami tracker, only when configured
+│   ├── <a href="components/AskTerminal.js">AskTerminal.js</a> + <a href="components/AskTerminal.module.css">.module.css</a>          # the ask box: streamed answers, links, follow-ups
+│   ├── <a href="components/Carousel.js">Carousel.js</a> + <a href="components/Carousel.module.css">.module.css</a>             # photos, video and live previews; arrows, dots, swipe
+│   ├── <a href="components/CertList.js">CertList.js</a> + <a href="components/CertList.module.css">.module.css</a>             # certifications list
+│   ├── <a href="components/Coursework.js">Coursework.js</a> + <a href="components/Coursework.module.css">.module.css</a>           # course list on Education
+│   ├── <a href="components/Cursor.js">Cursor.js</a> + <a href="components/Cursor.module.css">.module.css</a>               # difference-blend trailing dot
+│   ├── <a href="components/InterestOrbit.js">InterestOrbit.js</a> + <a href="components/InterestOrbit.module.css">.module.css</a>        # Interests orbit (anime.js + Motion)
+│   ├── <a href="components/InterferenceField.js">InterferenceField.js</a> + <a href="components/InterferenceField.module.css">.module.css</a>    # canvas plane-wave field
+│   ├── <a href="components/InterferenceFigure.js">InterferenceFigure.js</a> + <a href="components/InterferenceFigure.module.css">.module.css</a>   # that field, framed for the TEC project
+│   ├── <a href="components/Marquee.js">Marquee.js</a> + <a href="components/Marquee.module.css">.module.css</a>              # skills strip
+│   ├── <a href="components/MindMap.js">MindMap.js</a> + <a href="components/MindMap.module.css">.module.css</a>              # Projects page tree and detail pane
+│   ├── <a href="components/Nav.js">Nav.js</a> + <a href="components/Nav.module.css">.module.css</a>                  # desktop links + mobile panel
+│   ├── <a href="components/PageTitle.js">PageTitle.js</a>                          # page heading
+│   ├── <a href="components/PageTransition.js">PageTransition.js</a> + <a href="components/PageTransition.module.css">.module.css</a>       # route-change fade
+│   ├── <a href="components/Pipeline.js">Pipeline.js</a> + <a href="components/Pipeline.module.css">.module.css</a>             # NestIQ pipeline figure
+│   ├── <a href="components/ProjectSection.js">ProjectSection.js</a>                     # one project, shared by Projects and Publications
+│   ├── <a href="components/Reveal.js">Reveal.js</a>                             # fade-up on scroll
+│   ├── <a href="components/RoleFilter.js">RoleFilter.js</a> + <a href="components/RoleFilter.module.css">.module.css</a>           # Experience: tech roles / all roles
+│   ├── <a href="components/Section.js">Section.js</a> + <a href="components/Section.module.css">.module.css</a>              # two-column copy + media block
+│   ├── <a href="components/SmoothScroll.js">SmoothScroll.js</a>                       # Lenis, lazy-loaded
+│   ├── <a href="components/SplitReveal.js">SplitReveal.js</a> + <a href="components/SplitReveal.module.css">.module.css</a>          # word- or letter-by-letter heading reveal
+│   ├── <a href="components/Story.js">Story.js</a> + <a href="components/Story.module.css">.module.css</a>                # HireWire story layout
+│   ├── <a href="components/ThemeToggle.js">ThemeToggle.js</a> + <a href="components/ThemeToggle.module.css">.module.css</a>          # light / dark
+│   └── <a href="components/TransitionLink.js">TransitionLink.js</a>                     # links with View Transitions
+├── <a href="lib">lib/</a>                                      # data and helpers
+│   ├── <a href="lib/data.js">data.js</a>                               # ★ every word on the site
+│   ├── <a href="lib/images.js">images.js</a>                             # photo registry per section
+│   ├── <a href="lib/corpus.js">corpus.js</a>                             # data.js → the AI's profile
+│   └── <a href="lib/analytics.js">analytics.js</a>                          # wrapper around Umami
+├── <a href="public">public/</a>                                   # static files
+│   ├── <a href="public/images">images/</a>                               # photos, one folder per section
+│   └── <a href="public/icons">icons/</a>                                # logos and badges
+├── <a href="scripts">scripts/</a>
+│   └── <a href="scripts/copy-images.js">copy-images.js</a>                        # stages photos into public/images
+├── <a href=".env.local.example">.env.local.example</a>                        # every env var the project takes
+├── <a href="jsconfig.json">jsconfig.json</a>                             # @/ path aliases
+├── <a href="next.config.mjs">next.config.mjs</a>                           # Next.js config
+└── <a href="package.json">package.json</a>                              # scripts and dependencies
+</pre>
 
 ---
 
