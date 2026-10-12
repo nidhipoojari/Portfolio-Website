@@ -8,7 +8,10 @@
  *                also be { youtube: '<video id>', title } to show a video
  *                in the same frame, at the same size, as the photos,
  *                or { preview: '<url>', title } to show the top of a
- *                live site, running, scaled down into the frame.
+ *                live site, running, scaled down into the frame,
+ *                or { src: '<url>', title, fit: 'contain' } for a
+ *                single image that must not be cropped (a certificate
+ *                in a carousel of photos).
  * @param alt     Alt-text prefix; each slide gets "<alt> <n>".
  * @param variant 'portrait' is a 4:5 cover frame and suits photos.
  *                'wide' is 16:10 and contains rather than crops —
@@ -213,6 +216,16 @@ export default function Carousel({ images = [], alt = 'photo', variant = 'portra
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             referrerPolicy="strict-origin-when-cross-origin"
             allowFullScreen
+          />
+        ) : images[safeIndex]?.src ? (
+          <img
+            key={images[safeIndex].src}
+            src={images[safeIndex].src}
+            alt={images[safeIndex].title || `${alt} ${safeIndex + 1}`}
+            className={`${styles.img} ${
+              wide || images[safeIndex].fit === 'contain' ? styles.imgWide : 'bw'
+            }`}
+            loading="lazy"
           />
         ) : (
           <img
