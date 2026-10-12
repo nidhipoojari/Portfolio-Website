@@ -21,7 +21,7 @@ const SUGGESTIONS = [
   'What AI work has she shipped?',
   'Does she have production experience at scale?',
   'What is her strongest project?',
-  'Has she worked with Kubernetes?',
+  'What has she won at hackathons?',
 ];
 
 // Must match META_SEPARATOR in app/api/ask/route.js. Everything after it

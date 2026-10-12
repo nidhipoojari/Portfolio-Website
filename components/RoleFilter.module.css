@@ -54,8 +54,10 @@
 .list [data-kind] {
   counter-increment: role;
 }
-/* display:none also skips the counter, which is what renumbers. */
-.list[data-view='tech'] [data-kind='other'] {
+/* display:none also skips the counter, which is what renumbers.
+   Scoped to html.js: the server renders data-view="tech", and without
+   JavaScript there is no way to switch, so show every role instead. */
+:global(html.js) .list[data-view='tech'] [data-kind='other'] {
   display: none;
 }
 
@@ -70,6 +72,7 @@
   border-top: none;
 }
 .list[data-view='all'] [data-kind] ~ [data-kind] > article,
-.list[data-view='tech'] [data-kind='tech'] ~ [data-kind='tech'] > article {
+:global(html:not(.js)) .list [data-kind] ~ [data-kind] > article,
+:global(html.js) .list[data-view='tech'] [data-kind='tech'] ~ [data-kind='tech'] > article {
   border-top: 1px solid var(--line);
 }
