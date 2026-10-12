@@ -35,7 +35,9 @@ const MAX_FOLLOWUP_CHARS = 120;
 // the marker once the next chunk lands. That much has to be held back —
 // a chunk boundary can fall anywhere, including mid-marker. Trailing
 // whitespace is held too, so the newline before the marker never makes
-// it out as a dangling blank line under the answer.
+// it out as a dangling blank line under the answer. So is a trailing
+// full stop: if it turns out to end the answer straight after an email
+// address, stripEmailStop drops it before it is ever sent.
 function holdBack(text) {
   let keep = 0;
   for (let k = Math.min(META_MARKER.length - 1, text.length); k > 0; k--) {
@@ -46,8 +48,15 @@ function holdBack(text) {
   }
   let cut = text.length - keep;
   while (cut > 0 && /\s/.test(text[cut - 1])) cut--;
+  if (cut > 0 && text[cut - 1] === '.') cut--;
   return cut;
 }
+
+// Visitors copy the email out of the answer, and "name@gmail.com." with
+// the sentence's full stop attached is an address that bounces. The
+// prompt already asks for no punctuation after it; this catches the
+// times the model adds one anyway.
+const stripEmailStop = (text) => text.replace(/(@[\w-]+(?:\.[\w-]+)+)[.,;:!]+$/, '$1');
 
 // Everything the model wrote after the marker, reduced to what is safe
 // to render. Refs are looked up, never trusted; follow-ups are trimmed,
@@ -129,14 +138,14 @@ const text = (body, status) =>
 export async function POST(request) {
   if (!process.env.OPENAI_API_KEY) {
     return text(
-      'The assistant is not configured yet. Reach Nidhi directly at nidhipoojari702@gmail.com.',
+      'The assistant is not configured yet. Reach Nidhi directly at nidhipoojari702@gmail.com',
       503
     );
   }
 
   if (rateLimited(clientIp(request))) {
     return text(
-      'That is a lot of questions in a short time. Give it a few minutes, or just email Nidhi at nidhipoojari702@gmail.com.',
+      'That is a lot of questions in a short time. Give it a few minutes, or just email Nidhi at nidhipoojari702@gmail.com',
       429
     );
   }
@@ -197,7 +206,7 @@ export async function POST(request) {
   } catch (error) {
     console.error('[ask] could not open stream:', error);
     return text(
-      'Something went wrong reaching the assistant. Email Nidhi at nidhipoojari702@gmail.com.',
+      'Something went wrong reaching the assistant. Email Nidhi at nidhipoojari702@gmail.com',
       502
     );
   }
@@ -242,14 +251,14 @@ export async function POST(request) {
           const at = pending.indexOf(META_MARKER);
           if (at !== -1) {
             meta = pending.slice(at + META_MARKER.length);
-            pending = pending.slice(0, at).trimEnd();
+            pending = stripEmailStop(pending.slice(0, at).trimEnd());
             flush(pending.length);
           } else {
             flush(holdBack(pending));
           }
         }
 
-        pending = pending.trimEnd();
+        pending = stripEmailStop(pending.trimEnd());
         flush(pending.length);
 
         // A declined request is not an exception — it comes back as a
@@ -259,7 +268,7 @@ export async function POST(request) {
           send(
             stopReason === 'content_filter'
               ? "I can't answer that one. Ask me about Nidhi's work, projects, or background instead."
-              : 'The assistant had nothing to say to that. Try rephrasing, or email Nidhi at nidhipoojari702@gmail.com.'
+              : 'The assistant had nothing to say to that. Try rephrasing, or email Nidhi at nidhipoojari702@gmail.com'
           );
         } else if (meta !== null) {
           const parsed = parseMeta(meta, asked);
@@ -269,7 +278,7 @@ export async function POST(request) {
         console.error('[ask] stream failed:', error);
         if (!wroteSomething) {
           send(
-            'Something went wrong reaching the assistant. Email Nidhi at nidhipoojari702@gmail.com.'
+            'Something went wrong reaching the assistant. Email Nidhi at nidhipoojari702@gmail.com'
           );
         }
       } finally {

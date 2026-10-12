@@ -148,7 +148,7 @@ export default function AskTerminal() {
     } catch (error) {
       if (error.name !== 'AbortError') {
         setSegments([
-          'Could not reach the assistant. Email Nidhi at nidhipoojari702@gmail.com.',
+          'Could not reach the assistant. Email Nidhi at nidhipoojari702@gmail.com',
         ]);
         track('ask-failed', { status: 0 });
       }
