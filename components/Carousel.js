@@ -4,7 +4,7 @@
  * rather than pulled in, because Swiper and Embla both weigh more than
  * this whole component and I only needed two behaviours from either.
  *
- * @param images  Image URLs, e.g. ['/images/home/1.jpeg']. An entry can
+ * @param images  Image URLs, e.g. ['/images/home/3.jpeg']. An entry can
  *                also be { youtube: '<video id>', title } to show a video
  *                in the same frame, at the same size, as the photos,
  *                or { preview: '<url>', title } to show the top of a

@@ -10,10 +10,8 @@ import ThemeToggle from '@/components/ThemeToggle';
 import styles from './home.module.css';
 
 export default function HomePage() {
-  // Two photos if there are two; otherwise the hero shot does double
-  // duty further down the page.
-  const [hero, second] = HOME_IMAGES;
-  const aboutPhoto = second || hero;
+  // One photo, used once — in the hero.
+  const [hero] = HOME_IMAGES;
 
   return (
     <>
@@ -96,9 +94,6 @@ export default function HomePage() {
 
       {/* ---------- ABOUT ME ---------- */}
       <section className={styles.about}>
-        <Reveal className={styles.aboutPhoto}>
-          <img src={aboutPhoto} alt="Nidhi Poojari" />
-        </Reveal>
         <div className={styles.aboutText}>
           <SplitReveal as="h2" text="About me" className={styles.aboutHeading} />
           <Reveal as="p" className={styles.aboutBody} delay={160}>
