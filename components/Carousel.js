@@ -11,7 +11,8 @@
  *                live site, running, scaled down into the frame,
  *                or { src: '<url>', title, fit: 'contain' } for a
  *                single image that must not be cropped (a certificate
- *                in a carousel of photos).
+ *                in a carousel of photos). Add `href` to make that
+ *                slide open a link (e.g. a poster's full PDF) on click.
  * @param alt     Alt-text prefix; each slide gets "<alt> <n>".
  * @param variant 'portrait' is a 4:5 cover frame and suits photos.
  *                'wide' is 16:10 and contains rather than crops —
@@ -135,11 +136,15 @@ export default function Carousel({ images = [], alt = 'photo', variant = 'portra
   const dragRef = useRef(null);
   const SWIPE_THRESHOLD = 45; // px
   const [dragging, setDragging] = useState(false);
+  // Set when a swipe commits, so the click that ends the gesture does
+  // not also open a clickable slide's link.
+  const swipedRef = useRef(false);
 
   const onPointerDown = (e) => {
     if (total < 2) return;
     if (e.button && e.button !== 0) return;  // right/middle click isn't a swipe
     dragRef.current = { x: e.clientX, y: e.clientY, settled: false };
+    swipedRef.current = false;
     setDragging(true);
   };
 
@@ -160,6 +165,7 @@ export default function Carousel({ images = [], alt = 'photo', variant = 'portra
     if (Math.abs(dx) < SWIPE_THRESHOLD) return;
 
     drag.settled = true;
+    swipedRef.current = true;
     if (dx < 0) next();
     else prev();
     dragRef.current = null;
@@ -224,8 +230,16 @@ export default function Carousel({ images = [], alt = 'photo', variant = 'portra
             alt={images[safeIndex].title || `${alt} ${safeIndex + 1}`}
             className={`${styles.img} ${
               wide || images[safeIndex].fit === 'contain' ? styles.imgWide : 'bw'
-            }`}
+            } ${images[safeIndex].href ? styles.imgLink : ''}`}
             loading="lazy"
+            onClick={
+              images[safeIndex].href
+                ? () => {
+                    if (swipedRef.current) return;
+                    window.open(images[safeIndex].href, '_blank', 'noopener');
+                  }
+                : undefined
+            }
           />
         ) : (
           <img

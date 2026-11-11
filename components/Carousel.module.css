@@ -89,6 +89,14 @@
   transition: filter 400ms ease;
 }
 
+/* A slide that opens something larger (a poster's PDF). Shown in
+   colour from the start: it is a document to read, not a photo to
+   keep in the monochrome palette. */
+.imgLink {
+  cursor: zoom-in;
+  filter: none;
+}
+
 .frameWide:hover .imgWide,
 .frame:hover .imgWide {
   filter: grayscale(0%) contrast(1);

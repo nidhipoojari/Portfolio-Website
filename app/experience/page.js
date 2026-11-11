@@ -4,6 +4,7 @@
 import Section from '@/components/Section';
 import RoleFilter from '@/components/RoleFilter';
 import Marquee from '@/components/Marquee';
+import RoleHighlight from '@/components/RoleHighlight';
 import { experiences, bseTape } from '@/lib/data';
 import PageTitle from '@/components/PageTitle';
 
@@ -34,6 +35,10 @@ export default function ExperiencePage() {
               <p className="subtle" style={{ marginTop: '1rem', fontSize: '0.78rem', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
                 {exp.stack.join(' · ')}
               </p>
+
+              {exp.highlights?.map((h) => (
+                <RoleHighlight key={h.title} h={h} roleId={exp.id} />
+              ))}
             </Section>
 
             {/* Full width, between roles — a divider rather than something
