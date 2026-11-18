@@ -20,6 +20,12 @@ export default function Section({
   // Media above the copy in one column, for narrow containers such as
   // the Extracurricular details pane. Off everywhere else.
   stacked = false,
+  // Belongs to the section above it (coursework under a degree): drops
+  // the divider and hangs off the parent by a mind-map style connector.
+  nested = false,
+  // The other end of that connector: this section has a `nested` one
+  // under it, so its copy column carries the line down to it.
+  hasChildren = false,
   children,
 }) {
   // No photos means no media column at all — the copy runs full width
@@ -30,7 +36,7 @@ export default function Section({
     <Reveal
       as="article"
       id={id}
-      className={`${styles.section} ${hasMedia ? '' : styles.textOnly} ${stacked ? styles.stacked : ''}`}
+      className={`${styles.section} ${hasMedia ? '' : styles.textOnly} ${stacked ? styles.stacked : ''} ${nested ? styles.nested : ''} ${hasChildren ? styles.parent : ''}`}
     >
       <div className={styles.text}>
         {/* A number is zero-padded here. Anything else (the Experience

@@ -96,7 +96,127 @@
 .stacked .media { order: -1; width: 100%; max-width: 420px; }
 .stacked .mediaSticky { position: static; max-width: 720px; }
 
+/* A sub-part of the section above (e.g. coursework under a degree),
+   joined to it the way a node hangs off a branch on the Projects map:
+   a hub dot under the parent's copy, a rail down the rest of the
+   parent, a rounded elbow into this title, and a dot where it lands.
+   Same stroke, radius and colours as components/MindMap. */
+.parent,
+.nested {
+  --stroke: 2px;
+  --indent: 2.75rem;
+  --drop: 2.5rem;
+}
+
+/* Parent: no bottom padding, so its rail runs straight into the child.
+   The copy column stretches to the row's height (the photo is usually
+   taller) and the rail fills whatever is left under the copy. */
+.parent { padding-bottom: 0; }
+.parent .text {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+}
+.parent .text::before {
+  content: '';
+  order: 1;
+  flex: none;
+  width: 12px;
+  height: 12px;
+  margin-top: 1.75rem;
+  border-radius: 50%;
+  border: var(--stroke) solid var(--fg-muted);
+  background: var(--bg);
+}
+.parent .text::after {
+  content: '';
+  order: 2;
+  flex: 1 1 auto;
+  min-height: 1rem;
+  margin-left: 5px;
+  border-left: var(--stroke) solid var(--fg-muted);
+  transform-origin: top;
+  animation: drawDown 700ms var(--ease-smooth, ease) both 150ms;
+}
+
+.nested {
+  position: relative;
+  border-top: none;
+  padding: var(--drop) 0 4rem var(--indent);
+}
+
+.nested .title {
+  position: relative;
+  font-size: clamp(1.35rem, 2.4vw, 1.9rem);
+}
+
+/* Rail + elbow, from under the hub round into the title's middle. */
+.nested .title::before {
+  content: '';
+  position: absolute;
+  left: calc(5px - var(--indent));
+  top: calc(-1 * var(--drop));
+  width: calc(var(--indent) - 5px - 0.85rem);
+  height: calc(var(--drop) + 0.55em);
+  border: 0 solid var(--fg-muted);
+  border-left-width: var(--stroke);
+  border-bottom-width: var(--stroke);
+  border-bottom-left-radius: 14px;
+  transform-origin: top;
+  animation: drawDown 500ms var(--ease-smooth, ease) both 700ms;
+}
+
+/* Landing dot, where the line meets the title. */
+.nested .title::after {
+  content: '';
+  position: absolute;
+  left: -0.85rem;
+  top: calc(0.55em - 4px + 1px);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--fg-muted);
+  animation: dotIn 300ms ease both 1150ms;
+}
+
+@keyframes drawDown {
+  from { transform: scaleY(0); opacity: 0; }
+  to   { transform: scaleY(1); opacity: 1; }
+}
+@keyframes dotIn {
+  from { transform: scale(0); }
+  to   { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .parent .text::after,
+  .nested .title::before,
+  .nested .title::after { animation: none; }
+}
+
 @media (max-width: 900px) {
   .section { grid-template-columns: 1fr; gap: 2rem; padding: 3rem 0; }
+  /* One column: the parent's photo sits between its copy and the
+     child, so the rail would cut through it. Start the line at the
+     child instead, from a hub of its own. */
+  .parent { padding-bottom: 1rem; }
+  .parent .text::before,
+  .parent .text::after { display: none; }
+  .nested { --indent: 2rem; padding: var(--drop) 0 3rem var(--indent); }
+  .nested::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: var(--stroke) solid var(--fg-muted);
+    background: var(--bg);
+  }
+  .nested .title::before {
+    top: calc(12px - var(--drop));
+    height: calc(var(--drop) - 12px + 0.55em);
+  }
   .mediaSticky { position: static; }
 }
